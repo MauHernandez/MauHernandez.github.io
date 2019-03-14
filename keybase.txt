@@ -1,0 +1,56 @@
+==================================================================
+https://keybase.io/mauhernandez
+--------------------------------------------------------------------
+
+I hereby claim:
+
+  * I am an admin of https://mauhernandez.github.io
+  * I am mauhernandez (https://keybase.io/mauhernandez) on keybase.
+  * I have a public key ASA-60QKSUedLvIjmpzFU-Iv6eceXIfwzmqzu2t-jtTRAAo
+
+To do so, I am signing this object:
+
+{
+  "body": {
+    "key": {
+      "eldest_kid": "012081244c2680152cad3d6a35cf5de7845cc5c7686d1a02bb803ccbb50ed5f60f1d0a",
+      "host": "keybase.io",
+      "kid": "01203eeb440a49479d2ef2239a9cc553e22fe9e71e5c87f0ce6ab3bb6b7e8ed4d1000a",
+      "uid": "e5a28ef14aa1372c98fe941c5d493b19",
+      "username": "mauhernandez"
+    },
+    "merkle_root": {
+      "ctime": 1552569001,
+      "hash": "9e24578848e6e60c2de9aa76fbce0f48fe834540915819b43e1b5acd2055876bafde2c2b5eec70c7f93b097618465d7d08c4afee62f21aacc17ab5e6c61610ac",
+      "hash_meta": "68cfe08f44ab7216189bafe4deceb61565e8ea2ed6de9fab1fe6132557ecf9d7",
+      "seqno": 4947613
+    },
+    "service": {
+      "entropy": "jpGOsBKJ7mzZqYMq0e7ydzzu",
+      "hostname": "mauhernandez.github.io",
+      "protocol": "https:"
+    },
+    "type": "web_service_binding",
+    "version": 2
+  },
+  "client": {
+    "name": "keybase.io go client",
+    "version": "3.1.2"
+  },
+  "ctime": 1552569014,
+  "expire_in": 504576000,
+  "prev": "38a341e411a5ccdeb6e9c482619b3bb6ea0a8309f961ae49234d24047ac175f7",
+  "seqno": 14,
+  "tag": "signature"
+}
+
+which yields the signature:
+
+hKRib2R5hqhkZXRhY2hlZMOpaGFzaF90eXBlCqNrZXnEIwEgPutECklHnS7yI5qcxVPiL+nnHlyH8M5qs7trfo7U0QAKp3BheWxvYWTESpcCDsQgOKNB5BGlzN626cSCYZs7tuoKgwn5Ya5JI00kBHrBdffEILRPGFADFXu7lqalNDgZFV4cxPShDTws2EfYQgQ1jgUCAgHCo3NpZ8RAZ4fl6N/WYTRDsUgFoz/9Vy6am9DHWwEd2eBuLL9kZlOfPqatTQc0O0963u4ioqoWRPHB58KNxxq12+u7UzAbA6hzaWdfdHlwZSCkaGFzaIKkdHlwZQildmFsdWXEIL8uf071YZISr4AilBC/FYvndBKachYxXLYBngvNAOtto3RhZ80CAqd2ZXJzaW9uAQ==
+
+And finally, I am proving ownership of this host by posting or
+appending to this document.
+
+View my publicly-auditable identity here: https://keybase.io/mauhernandez
+
+==================================================================
