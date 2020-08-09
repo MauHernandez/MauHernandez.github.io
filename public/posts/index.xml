@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Mau Hernandez</title>
+    
+    
+    
+    <link>/posts/</link>
+    <description>Recent content in Posts on Mau Hernandez</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 08 Aug 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>This side UP!</title>
+      <link>/posts/hello/</link>
+      <pubDate>Sat, 08 Aug 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/posts/hello/</guid>
+      <description>
+        
+          &lt;img src=&#34;/img/mau.jpg&#34;/&gt;
+          
+        
+        
+        
+          Now that you are here, come in! My name is Maureen but my friends call me Mau. I&#39;m a system engineer working as a manager and sometimes I act as a researcher for electromagnetic spectrum research and Internet Governance.
+          
+        
+        </description>
+    </item>
+    
+  </channel>
+</rss>
