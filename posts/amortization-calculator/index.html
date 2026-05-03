@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loan Amortization Calculator — Newton-Raphson Method</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap');
+
+:root {
+  --bg: #f5f3ee;
+  --bg2: #eae7df;
+  --bg3: #ddd9cf;
+  --card: #ffffff;
+  --text: #2c2a25;
+  --text2: #6b6860;
+  --text3: #9e9a90;
+  --accent: #b45309;
+  --accent2: #d97706;
+  --accent-bg: #fef3c7;
+  --blue: #1e6faf;
+  --blue-bg: #e8f1f8;
+  --green: #15803d;
+  --green-bg: #dcfce7;
+  --red: #c0392b;
+  --border: #d8d4cb;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --display: 'Fraunces', Georgia, serif;
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+/* ── Header ── */
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 2.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.header h1 {
+  font-family: var(--display);
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.header p {
+  font-size: 1.05rem;
+  color: var(--text2);
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+.lang-picker {
+  display: inline-flex;
+  background: var(--bg2);
+  border-radius: 6px;
+  padding: 3px;
+  margin-bottom: 1rem;
+}
+
+.lang-btn {
+  padding: 5px 14px;
+  border: none;
+  background: none;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text2);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.lang-btn.active {
+  background: var(--card);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+
+/* ── Input panel ── */
+.input-panel {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  box-shadow: var(--shadow);
+  margin-bottom: 2rem;
+  border: 1px solid var(--border);
+}
+
+.input-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.input-group label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text2);
+  margin-bottom: 4px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.input-group input, .input-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  color: var(--text);
+  background: var(--bg);
+  transition: border-color 0.2s;
+}
+
+.input-group input:focus, .input-group select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.calc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.calc-btn:hover { background: var(--accent2); }
+
+/* ── Results cards ── */
+.results-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.result-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.result-card.highlight {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+}
+
+.result-card h3 {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text3);
+  margin-bottom: 4px;
+}
+
+.result-card .value {
+  font-family: var(--mono);
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+.result-card .sub {
+  font-size: 0.8rem;
+  color: var(--text2);
+  margin-top: 2px;
+}
+
+/* ── Sections ── */
+.section {
+  margin-bottom: 2.5rem;
+}
+
+.section-title {
+  font-family: var(--display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: var(--text);
+}
+
+.section-desc {
+  font-size: 0.9rem;
+  color: var(--text2);
+  margin-bottom: 1rem;
+}
+
+/* ── NR convergence table ── */
+.nr-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.nr-table th {
+  text-align: right;
+  padding: 8px 10px;
+  font-weight: 500;
+  color: var(--text3);
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  border-bottom: 2px solid var(--border);
+}
+
+.nr-table td {
+  text-align: right;
+  padding: 7px 10px;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  border-bottom: 1px solid var(--bg2);
+}
+
+.nr-table tr.penny-row {
+  background: var(--accent-bg);
+}
+
+.nr-table tr.penny-row td {
+  font-weight: 500;
+}
+
+/* ── Chart container ── */
+.chart-wrap {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  margin-bottom: 1rem;
+}
+
+.chart-box {
+  position: relative;
+  height: 340px;
+}
+
+.chart-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+  color: var(--text2);
+  margin-top: 0.75rem;
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.legend-dot.circle { border-radius: 50%; }
+
+/* ── Schedule table ── */
+.sched-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 0.5rem;
+}
+
+.sched-controls select {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  background: var(--card);
+}
+
+.sched-wrap {
+  max-height: 460px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.sched-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.sched-table th {
+  text-align: right;
+  padding: 8px 8px;
+  font-weight: 500;
+  color: var(--text3);
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  border-bottom: 2px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--card);
+  z-index: 1;
+}
+
+.sched-table td {
+  text-align: right;
+  padding: 6px 8px;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  border-bottom: 1px solid var(--bg2);
+}
+
+.sched-table tr.last-row {
+  background: var(--accent-bg);
+}
+
+.sched-table tr.last-row td { font-weight: 500; }
+
+.sched-table tr.sep-row td {
+  text-align: center;
+  color: var(--text3);
+  font-family: var(--sans);
+  font-style: italic;
+  border-bottom: none;
+}
+
+/* ── Comparison panel ── */
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.compare-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.compare-card h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.compare-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  font-size: 0.85rem;
+  border-bottom: 1px solid var(--bg2);
+}
+
+.compare-row:last-child { border-bottom: none; }
+.compare-label { color: var(--text2); }
+.compare-val { font-family: var(--mono); font-weight: 500; }
+
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.tag-blue { background: var(--blue-bg); color: var(--blue); }
+.tag-green { background: var(--green-bg); color: var(--green); }
+
+.note-box {
+  background: var(--bg2);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  font-size: 0.82rem;
+  color: var(--text2);
+  line-height: 1.5;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .results-row, .compare-grid { grid-template-columns: 1fr; }
+  .input-grid { grid-template-columns: 1fr 1fr; }
+  .chart-box { height: 260px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- HEADER -->
+<div class="header">
+  <a id="backLink" href="/posts/amortization/" style="display:inline-block;font-size:0.82rem;font-weight:500;color:var(--text2);text-decoration:none;margin-bottom:0.75rem;letter-spacing:0.01em">← Loans and Their Components</a>
+  <div class="lang-picker">
+    <button class="lang-btn active" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" onclick="setLang('es')">ES</button>
+  </div>
+  <h1 id="title">Loan Amortization Calculator</h1>
+  <p id="subtitle">Understanding Newton-Raphson, day count conventions, and why real payments differ from textbook formulas.</p>
+</div>
+
+<!-- INPUTS -->
+<div class="input-panel">
+  <div class="input-grid">
+    <div class="input-group">
+      <label id="lbl-pv">Loan Amount</label>
+      <input type="number" id="pv" value="25924.99" step="0.01">
+    </div>
+    <div class="input-group">
+      <label id="lbl-rate">Annual Rate (%)</label>
+      <input type="number" id="rate" value="23.37" step="0.01">
+    </div>
+    <div class="input-group">
+      <label id="lbl-term">Term (years)</label>
+      <input type="number" id="term" value="5">
+    </div>
+    <div class="input-group">
+      <label id="lbl-orig">Origination Date</label>
+      <input type="date" id="origDate" value="2025-09-18">
+    </div>
+    <div class="input-group">
+      <label id="lbl-fpd">First Payment Date</label>
+      <input type="date" id="firstPmtDate" value="2025-10-18">
+    </div>
+  </div>
+  <button class="calc-btn" id="calcBtn" onclick="calc()">&#9654; Calculate</button>
+</div>
+
+<!-- COMPARISON -->
+<div id="compSection" class="section">
+  <h2 class="section-title" id="comp-title">Spreadsheet vs. Real-World Servicing</h2>
+  <p class="section-desc" id="comp-desc">Spreadsheets keep full floating-point precision internally and only display 2 decimals. Real servicing systems round to the penny at every step, causing cumulative drift.</p>
+  <div class="compare-grid" id="compareCards"></div>
+</div>
+
+<!-- NR CONVERGENCE -->
+<div id="nrSection" class="section">
+  <h2 class="section-title" id="nr-title">Newton-Raphson Convergence</h2>
+  <p class="section-desc" id="nr-desc">The 30/360 formula provides the initial guess. Newton-Raphson adjusts it for actual day counts, then a penny-level search finds the cent value that minimizes the last payment difference.</p>
+  <div id="nrTableWrap"></div>
+</div>
+
+<!-- CHART -->
+<div id="chartSection" class="section">
+  <h2 class="section-title" id="chart-title">Penny Search: Last Payment Difference</h2>
+  <p class="section-desc" id="chart-desc">Each dot is a cent value. The Y axis shows how much the final payment would differ from the standard. The zigzag pattern is caused by penny rounding — you can't just round the Newton-Raphson result.</p>
+  <div class="chart-wrap">
+    <div class="chart-box"><canvas id="mainChart"></canvas></div>
+    <div class="chart-legend" id="chartLegend"></div>
+  </div>
+</div>
+
+<!-- SCHEDULE -->
+<div id="schedSection" class="section">
+  <h2 class="section-title" id="sched-title">Amortization Schedule</h2>
+  <div class="sched-controls">
+    <select id="viewRange" onchange="renderTable()">
+      <option value="first6" id="opt-first6">First 6 months</option>
+      <option value="last6" id="opt-last6" selected>Last 6 months</option>
+      <option value="both" id="opt-both">First 6 + Last 6</option>
+      <option value="all" id="opt-all">All payments</option>
+    </select>
+    <select id="whichSched" onchange="renderTable()">
+      <option value="thirty360sheet" id="opt-30360s">30/360 — Continuous</option>
+      <option value="thirty360" id="opt-30360">30/360 — Penny-rounded</option>
+      <option value="actual365sheet" id="opt-a365s">Actual/365 — Continuous</option>
+      <option value="actual365" id="opt-a365">Actual/365 — Penny-rounded</option>
+    </select>
+  </div>
+  <div class="sched-wrap"><div id="scheduleTable"></div></div>
+</div>
+
+<!-- EXPLANATION -->
+<div id="explainSection" class="section">
+  <h2 class="section-title" id="explain-title">Why the Final Payment Differs</h2>
+  <div class="note-box" id="explainNote"></div>
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ── i18n ──
+const L = {
+  en: {
+    title: 'Loan Amortization Calculator',
+    subtitle: 'Understanding Newton-Raphson, day count conventions, and why real payments differ from textbook formulas.',
+    lblPv: 'Loan Amount', lblRate: 'Annual Rate (%)', lblTerm: 'Term (years)', lblOrig: 'Origination Date', lblFpd: 'First Payment Date',
+    calcBtn: '&#9654; Calculate',
+    compTitle: 'Spreadsheet vs. Real-World Servicing',
+    compDesc: 'Spreadsheets keep full floating-point precision internally and only display 2 decimals. Real servicing systems round to the penny at every step, causing cumulative drift.',
+    nrTitle: 'Newton-Raphson Convergence',
+    nrDesc: 'The 30/360 formula provides the initial guess. Newton-Raphson adjusts it for actual day counts, then a penny-level search finds the cent value that minimizes the last payment difference.',
+    chartTitle: 'Penny Search: Last Payment Difference',
+    chartDesc: 'Each dot is a cent value. The Y axis shows how much the final payment would differ from the standard. The zigzag pattern is caused by penny rounding — you can\'t just round the Newton-Raphson result.',
+    schedTitle: 'Amortization Schedule',
+    first6: 'First 6 months', last6: 'Last 6 months', both: 'First 6 + Last 6', all: 'All payments',
+    a365: 'Actual/365 — Penny-rounded', a365s: 'Actual/365 — Continuous', t360: '30/360 — Penny-rounded', t360s: '30/360 — Continuous',
+    explainTitle: 'Why the Final Payment Differs',
+    c30: '30/360', cA365: 'Actual/365',
+    formula: 'Formula', rounded: 'Rounded', monthly: 'Monthly payment', allSame: 'All payments identical',
+    spreadsheet: 'Spreadsheet mode', servicing: 'Servicing mode',
+    nrContinuous: 'NR continuous', nrRounded: 'NR rounded (naive)', pennyOptimal: 'Penny-optimal',
+    lastPmt: 'Last payment', step: 'Step', pmtGuess: 'PMT guess', residual: 'Residual', newPmt: 'New PMT',
+    pennySearch: 'Penny search', around: 'around',
+    thMo: '#', thDate: 'Date', thDays: 'Days', thPmt: 'Payment', thInt: 'Interest', thPrin: 'Principal', thBal: 'Balance',
+    explainText: (pmt30, bestPmt, diff, nrPmt) => `<strong>30/360 (spreadsheet):</strong> Every payment is \$${pmt30}. Equal 30-day periods + full float precision = zero drift.<br><br><strong>Actual/365 (spreadsheet):</strong> Newton-Raphson finds the continuous payment (\$${nrPmt}). Using actual day counts but full precision at every step, all payments display as the same amount and the balance hits \$0.00. This is what you see in Excel or Google Sheets.<br><br><strong>Actual/365 (real servicing):</strong> The borrower pays exactly \$${bestPmt}. Interest is rounded to the penny each month. Over all periods, the cumulative rounding drift means the final payment differs by \$${diff}. This is normal, expected, and disclosed per TILA.`,
+    noNr: 'No NR needed — closed form',
+    precisionNote: 'Full float precision internally. Displays as',
+    backLink: '← Loans and Their Components',
+  },
+  es: {
+    title: 'Calculadora de Amortización',
+    subtitle: 'Entendiendo Newton-Raphson, convenciones de conteo de días, y por qué los pagos reales difieren de las fórmulas de texto.',
+    lblPv: 'Monto del Préstamo', lblRate: 'Tasa Anual (%)', lblTerm: 'Plazo (años)', lblOrig: 'Fecha de Originación', lblFpd: 'Fecha del Primer Pago',
+    calcBtn: '&#9654; Calcular',
+    compTitle: 'Hoja de Cálculo vs. Servicio Real',
+    compDesc: 'Las hojas de cálculo mantienen precisión flotante completa internamente y solo muestran 2 decimales. Los sistemas reales redondean al centavo en cada paso, causando desviación acumulativa.',
+    nrTitle: 'Convergencia Newton-Raphson',
+    nrDesc: 'La fórmula 30/360 da la estimación inicial. Newton-Raphson la ajusta para los días reales, luego una búsqueda al centavo encuentra el valor que minimiza la diferencia del último pago.',
+    chartTitle: 'Búsqueda al Centavo: Diferencia del Último Pago',
+    chartDesc: 'Cada punto es un valor en centavos. El eje Y muestra cuánto diferiría el pago final del estándar. El patrón zigzag es causado por el redondeo al centavo — no puedes simplemente redondear el resultado de Newton-Raphson.',
+    schedTitle: 'Tabla de Amortización',
+    first6: 'Primeros 6 meses', last6: 'Últimos 6 meses', both: 'Primeros 6 + Últimos 6', all: 'Todos los pagos',
+    a365: 'Actual/365 — Redondeado al centavo', a365s: 'Actual/365 — Continuo', t360: '30/360 — Redondeado al centavo', t360s: '30/360 — Continuo',
+    explainTitle: 'Por Qué el Último Pago Difiere',
+    c30: '30/360', cA365: 'Actual/365',
+    formula: 'Fórmula', rounded: 'Redondeado', monthly: 'Pago mensual', allSame: 'Todos los pagos iguales',
+    spreadsheet: 'Modo hoja de cálculo', servicing: 'Modo servicio',
+    nrContinuous: 'NR continuo', nrRounded: 'NR redondeado (ingenuo)', pennyOptimal: 'Óptimo al centavo',
+    lastPmt: 'Último pago', step: 'Paso', pmtGuess: 'Estimación', residual: 'Residual', newPmt: 'Nuevo PMT',
+    pennySearch: 'Búsqueda centavo', around: 'alrededor de',
+    thMo: '#', thDate: 'Fecha', thDays: 'Días', thPmt: 'Pago', thInt: 'Interés', thPrin: 'Capital', thBal: 'Saldo',
+    explainText: (pmt30, bestPmt, diff, nrPmt) => `<strong>30/360 (hoja de cálculo):</strong> Todos los pagos son \$${pmt30}. Períodos iguales de 30 días + precisión flotante = cero desviación.<br><br><strong>Actual/365 (hoja de cálculo):</strong> Newton-Raphson encuentra el pago continuo (\$${nrPmt}). Usando días reales pero precisión completa en cada paso, todos los pagos se muestran iguales y el saldo llega a \$0.00. Esto es lo que ves en Excel o Google Sheets.<br><br><strong>Actual/365 (servicio real):</strong> El prestatario paga exactamente \$${bestPmt}. El interés se redondea al centavo cada mes. La desviación acumulativa significa que el pago final difiere por \$${diff}. Esto es normal, esperado, y se divulga según TILA.`,
+    noNr: 'No necesita NR — fórmula cerrada',
+    precisionNote: 'Precisión flotante completa internamente. Se muestra como',
+    backLink: '← Préstamos y sus Partes',
+  }
+};
+
+let lang = 'en';
+function t(key) { return L[lang][key] || L.en[key] || key; }
+
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.textContent.trim() === l.toUpperCase()));
+  document.getElementById('title').textContent = t('title');
+  document.getElementById('subtitle').textContent = t('subtitle');
+  document.getElementById('lbl-pv').textContent = t('lblPv');
+  document.getElementById('lbl-rate').textContent = t('lblRate');
+  document.getElementById('lbl-term').textContent = t('lblTerm');
+  document.getElementById('lbl-orig').textContent = t('lblOrig');
+  document.getElementById('lbl-fpd').textContent = t('lblFpd');
+  document.getElementById('calcBtn').innerHTML = t('calcBtn');
+  document.getElementById('comp-title').textContent = t('compTitle');
+  document.getElementById('comp-desc').textContent = t('compDesc');
+  document.getElementById('nr-title').textContent = t('nrTitle');
+  document.getElementById('nr-desc').textContent = t('nrDesc');
+  document.getElementById('chart-title').textContent = t('chartTitle');
+  document.getElementById('chart-desc').textContent = t('chartDesc');
+  document.getElementById('sched-title').textContent = t('schedTitle');
+  document.getElementById('opt-first6').textContent = t('first6');
+  document.getElementById('opt-last6').textContent = t('last6');
+  document.getElementById('opt-both').textContent = t('both');
+  document.getElementById('opt-all').textContent = t('all');
+  document.getElementById('opt-a365').textContent = t('a365');
+  document.getElementById('opt-a365s').textContent = t('a365s');
+  document.getElementById('opt-30360').textContent = t('t360');
+  document.getElementById('opt-30360s').textContent = t('t360s');
+  document.getElementById('explain-title').textContent = t('explainTitle');
+  document.getElementById('backLink').textContent = t('backLink');
+  calc();
+}
+
+// ── Math ──
+const $ = id => document.getElementById(id);
+const r2 = v => Math.round(v * 100) / 100;
+
+function buildPeriods(origDateStr, firstPmtDateStr, n) {
+  const orig = new Date(origDateStr + 'T00:00:00');
+  const first = new Date(firstPmtDateStr + 'T00:00:00');
+  const daysToFirst = Math.round((first - orig) / 86400000);
+  const y0 = first.getFullYear(), m0 = first.getMonth(), d0 = first.getDate();
+  const periods = [daysToFirst];
+  const dates = [orig, first];
+  for (let i = 1; i < n; i++) {
+    const prev = new Date(y0, m0 + (i - 1), d0);
+    const curr = new Date(y0, m0 + i, d0);
+    periods.push(Math.round((curr - prev) / 86400000));
+    dates.push(curr);
+  }
+  return { periods, dates, daysToFirst };
+}
+
+function amort30360Sheet(PV, rate, pmt, n, dates) {
+  const rM = rate / 12;
+  const pmtPrecise = PV * rM / (1 - Math.pow(1 + rM, -n));
+  let bal = PV;
+  const rows = [];
+  for (let i = 0; i < n; i++) {
+    const interest = bal * rM;
+    const principal = pmtPrecise - interest;
+    bal -= principal;
+    const dt = dates ? dates[i + 1] : null;
+    const dateStr = dt ? dt.toISOString().slice(0, 10) : '';
+    rows.push({
+      month: i + 1, days: 30, date: dateStr,
+      payment: r2(pmtPrecise),
+      interest: r2(interest),
+      principal: r2(principal),
+      balance: r2(bal)
+    });
+  }
+  return rows;
+}
+
+function amort30360Rounded(PV, rate, pmt, n, dates) {
+  const rM = rate / 12;
+  let bal = PV;
+  const rows = [];
+  for (let i = 0; i < n; i++) {
+    const interest = r2(bal * rM);
+    let payment, principal;
+    if (i === n - 1) {
+      principal = bal;
+      payment = r2(bal + interest);
+    } else {
+      payment = pmt;
+      principal = r2(payment - interest);
+    }
+    bal = r2(bal - principal);
+    const dt = dates ? dates[i + 1] : null;
+    const dateStr = dt ? dt.toISOString().slice(0, 10) : '';
+    rows.push({ month: i + 1, days: 30, date: dateStr, payment, interest, principal, balance: bal });
+  }
+  return rows;
+}
+
+function amort365(PV, rate, pmt, periods, dates) {
+  let bal = PV;
+  const rows = [];
+  for (let i = 0; i < periods.length; i++) {
+    const interest = r2(bal * rate * periods[i] / 365);
+    let payment, principal;
+    if (i === periods.length - 1) {
+      principal = bal;
+      payment = r2(bal + interest);
+    } else {
+      payment = pmt;
+      principal = r2(payment - interest);
+    }
+    bal = r2(bal - principal);
+    const dt = dates ? dates[i + 1] : null;
+    const dateStr = dt ? dt.toISOString().slice(0, 10) : '';
+    rows.push({ month: i + 1, days: periods[i], date: dateStr, payment, interest, principal, balance: bal });
+  }
+  return rows;
+}
+
+function amort365Spreadsheet(PV, rate, pmtPrecise, periods, dates) {
+  let bal = PV;
+  const rows = [];
+  for (let i = 0; i < periods.length; i++) {
+    const interest = bal * rate * periods[i] / 365;
+    const principal = pmtPrecise - interest;
+    bal -= principal;
+    const dt = dates ? dates[i + 1] : null;
+    const dateStr = dt ? dt.toISOString().slice(0, 10) : '';
+    rows.push({
+      month: i + 1, days: periods[i], date: dateStr,
+      payment: r2(pmtPrecise),
+      interest: r2(interest),
+      principal: r2(principal),
+      balance: r2(bal)
+    });
+  }
+  return rows;
+}
+
+function continuousRes(PV, rate, PMT, periods) {
+  let b = PV;
+  for (let i = 0; i < periods.length; i++) b -= (PMT - b * rate * periods[i] / 365);
+  return b;
+}
+
+function solveNR(PV, rate, periods, guess) {
+  let PMT = guess;
+  const iters = [];
+  for (let i = 0; i < 20; i++) {
+    const eps = 0.0001;
+    const r = continuousRes(PV, rate, PMT, periods);
+    const dr = (continuousRes(PV, rate, PMT + eps, periods) - r) / eps;
+    if (Math.abs(dr) < 1e-15) break;
+    const next = PMT - r / dr;
+    iters.push({ iter: i + 1, pmt: PMT, residual: r, newPmt: next });
+    if (Math.abs(next - PMT) < 1e-10) { PMT = next; break; }
+    PMT = next;
+  }
+  return { pmt: PMT, iters };
+}
+
+function pennySearch(PV, rate, periods, nrPmt, dates) {
+  const center = Math.round(nrPmt * 100);
+  let best = null, bestDiff = Infinity;
+  const candidates = [];
+  for (let c = center - 200; c <= center + 200; c++) {
+    const pmt = c / 100;
+    const rows = amort365(PV, rate, pmt, periods, dates);
+    const last = rows[rows.length - 1].payment;
+    const diff = Math.abs(last - pmt);
+    candidates.push({ pmt, last, diff });
+    if (diff < bestDiff) { bestDiff = diff; best = { pmt, last, diff }; }
+  }
+  return { best, candidates };
+}
+
+// ── State ──
+let schedData = {};
+let solvedPmts = {};
+let chart;
+
+// ── Render ──
+function calc() {
+  const PV = parseFloat($('pv').value);
+  const rate = parseFloat($('rate').value) / 100;
+  const years = parseInt($('term').value);
+  const n = years * 12;
+  const origDate = $('origDate').value;
+  const firstPmtDate = $('firstPmtDate').value;
+  const { periods, dates, daysToFirst } = buildPeriods(origDate, firstPmtDate, n);
+  const rM = rate / 12;
+
+  const pmt30exact = PV * rM / (1 - Math.pow(1 + rM, -n));
+  const pmt30 = r2(pmt30exact);
+
+  const { pmt: nrPmt, iters } = solveNR(PV, rate, periods, pmt30exact);
+  const { best: best365, candidates } = pennySearch(PV, rate, periods, nrPmt, dates);
+
+  const nrRounded = r2(nrPmt);
+  const nrRoundedRows = amort365(PV, rate, nrRounded, periods, dates);
+  const nrRoundedLast = nrRoundedRows[nrRoundedRows.length - 1].payment;
+
+  schedData.thirty360sheet = amort30360Sheet(PV, rate, pmt30, n, dates);
+  schedData.thirty360 = amort30360Rounded(PV, rate, pmt30, n, dates);
+  schedData.actual365 = amort365(PV, rate, best365.pmt, periods, dates);
+  schedData.actual365sheet = amort365Spreadsheet(PV, rate, nrPmt, periods, dates);
+  solvedPmts.thirty360sheet = pmt30;
+  solvedPmts.thirty360 = pmt30;
+  solvedPmts.actual365 = best365.pmt;
+  solvedPmts.actual365sheet = r2(nrPmt);
+
+  const daysLabel = lang === 'es' ? 'días' : 'days';
+  const firstPLabel = lang === 'es' ? 'Primer periodo' : 'First period';
+  const closedFormLabel = lang === 'es' ? 'Fórmula cerrada' : 'Closed-form';
+  const nrLabel = 'Newton-Raphson';
+
+  // ── Comparison cards ──
+
+  $('compareCards').innerHTML = `
+    <div class="compare-card">
+      <h4>${t('c30')}</h4>
+      <div class="compare-row"><span class="compare-label">${closedFormLabel}</span><span class="compare-val">$${pmt30exact.toFixed(6)}</span></div>
+      <div class="compare-row"><span class="compare-label">${t('monthly')}</span><span class="compare-val"><strong>$${pmt30.toFixed(2)}</strong></span></div>
+      <div class="compare-row"><span class="compare-label">${t('lastPmt')}</span><span class="compare-val"><strong>$${pmt30.toFixed(2)}</strong></span></div>
+      <div class="compare-row"><span class="compare-label">${lang === 'es' ? 'Saldo final' : 'Final balance'}</span><span class="compare-val">$0.00</span></div>
+      <div style="margin-top:8px; font-size:0.78rem; color:var(--text3);">${lang === 'es' ? 'Periodos iguales de 30 días. No necesita NR.' : 'Equal 30-day periods. No NR needed.'}</div>
+    </div>
+    <div class="compare-card">
+      <h4>${t('cA365')}</h4>
+      <div class="compare-row"><span class="compare-label">${nrLabel}</span><span class="compare-val">$${nrPmt.toFixed(6)}</span></div>
+      <div class="compare-row"><span class="compare-label">${t('monthly')}</span><span class="compare-val"><strong>$${r2(nrPmt).toFixed(2)}</strong></span></div>
+      <div class="compare-row"><span class="compare-label">${t('lastPmt')}</span><span class="compare-val"><strong>$${r2(nrPmt).toFixed(2)}</strong></span></div>
+      <div class="compare-row"><span class="compare-label">${lang === 'es' ? 'Saldo final' : 'Final balance'}</span><span class="compare-val">$0.00</span></div>
+      <div style="margin-top:8px; font-size:0.78rem; color:var(--text3);">${firstPLabel}: ${daysToFirst} ${daysLabel} · Total: ${periods.reduce((a, b) => a + b, 0)} ${daysLabel}</div>
+    </div>`;
+
+  // ── NR table ──
+  let nrH = '<table class="nr-table"><tr>';
+  [t('step'), t('pmtGuess'), t('residual'), t('newPmt')].forEach(h => nrH += '<th>' + h + '</th>');
+  nrH += '</tr>';
+  iters.forEach(it => {
+    nrH += '<tr>';
+    nrH += '<td>NR ' + it.iter + '</td>';
+    nrH += '<td>$' + it.pmt.toFixed(6) + '</td>';
+    nrH += '<td>$' + it.residual.toFixed(4) + '</td>';
+    nrH += '<td>$' + it.newPmt.toFixed(6) + '</td></tr>';
+  });
+  nrH += '<tr class="penny-row"><td>' + t('pennySearch') + '</td>';
+  nrH += '<td colspan="2">&plusmn;$2.00 ' + t('around') + ' $' + nrRounded.toFixed(2) + '</td>';
+  nrH += '<td>$' + best365.pmt.toFixed(2) + '</td></tr></table>';
+  $('nrTableWrap').innerHTML = nrH;
+
+  // ── Chart ──
+  const nearby = candidates.filter(c => Math.abs(c.pmt - best365.pmt) <= 0.30);
+
+  if (chart) chart.destroy();
+  chart = new Chart($('mainChart'), {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        data: nearby.map(c => ({ x: c.pmt, y: c.last - c.pmt })),
+        borderColor: '#1e6faf', borderWidth: 2, showLine: true, tension: 0, fill: false,
+        pointRadius: nearby.map(c => c.pmt === best365.pmt ? 9 : c.pmt === nrRounded ? 7 : 3),
+        pointBackgroundColor: nearby.map(c => c.pmt === best365.pmt ? '#15803d' : c.pmt === nrRounded ? '#c0392b' : '#1e6faf'),
+        pointStyle: nearby.map(c => c.pmt === nrRounded && nrRounded !== best365.pmt ? 'triangle' : 'circle')
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 200 },
+      plugins: {
+        legend: { display: false },
+        tooltip: { titleFont: { family: 'JetBrains Mono' }, bodyFont: { family: 'JetBrains Mono' },
+          callbacks: { label: ctx => 'PMT: $' + ctx.parsed.x.toFixed(2) + ', Diff: ' + (ctx.parsed.y >= 0 ? '+' : '') + '$' + ctx.parsed.y.toFixed(2) } }
+      },
+      scales: {
+        x: { title: { display: true, text: t('monthly') + ' ($)', font: { family: 'DM Sans', size: 13, weight: 500 } },
+             ticks: { font: { family: 'JetBrains Mono', size: 11 }, callback: v => '$' + v.toFixed(2) },
+             grid: { color: '#e8e6e1' } },
+        y: { title: { display: true, text: t('lastPmt') + ' - ' + t('monthly') + ' ($)', font: { family: 'DM Sans', size: 13, weight: 500 } },
+             ticks: { font: { family: 'JetBrains Mono', size: 11 }, callback: v => (v >= 0 ? '+' : '') + '$' + v.toFixed(2) },
+             grid: { color: '#e8e6e1', lineWidth: ctx => ctx.tick.value === 0 ? 2 : 1 } }
+      }
+    }
+  });
+
+  $('chartLegend').innerHTML = `
+    <span><span class="legend-dot circle" style="background:#15803d;"></span> ${t('pennyOptimal')} ($${best365.pmt.toFixed(2)})</span>
+    ${nrRounded !== best365.pmt ? '<span><span class="legend-dot" style="background:#c0392b;"></span> ' + t('nrRounded') + ' ($' + nrRounded.toFixed(2) + ')</span>' : ''}
+    <span style="color:var(--text3);">Y = 0: ${t('lastPmt').toLowerCase()} = ${t('monthly').toLowerCase()}</span>`;
+
+  // ── Explanation ──
+  const finalDiff = (best365.last - best365.pmt).toFixed(2);
+  $('explainNote').innerHTML = t('explainText')(pmt30.toFixed(2), best365.pmt.toFixed(2), (best365.last - best365.pmt >= 0 ? '+' : '') + '$' + finalDiff, nrPmt.toFixed(6));
+
+  renderTable();
+}
+
+function renderTable() {
+  const which = $('whichSched').value;
+  const rows = schedData[which];
+  const pmt = solvedPmts[which];
+  if (!rows || !rows.length) return;
+
+  const view = $('viewRange').value;
+  let display;
+  if (view === 'first6') display = rows.slice(0, 6);
+  else if (view === 'last6') display = rows.slice(-6);
+  else if (view === 'both') display = [...rows.slice(0, 6), null, ...rows.slice(-6)];
+  else display = rows;
+
+  let h = '<table class="sched-table"><tr>';
+  [t('thMo'), t('thDate'), t('thDays'), t('thPmt'), t('thInt'), t('thPrin'), t('thBal')].forEach(c => h += '<th>' + c + '</th>');
+  h += '</tr>';
+
+  display.forEach(s => {
+    if (s === null) { h += '<tr class="sep-row"><td colspan="7">. . .</td></tr>'; return; }
+    const isLast = s.month === rows.length && (which === 'actual365' || which === 'thirty360');
+    h += '<tr class="' + (isLast ? 'last-row' : '') + '">';
+    h += '<td>' + s.month + '</td>';
+    h += '<td>' + s.date + '</td>';
+    h += '<td>' + s.days + '</td>';
+    h += '<td>$' + s.payment.toFixed(2) + '</td>';
+    h += '<td>$' + s.interest.toFixed(2) + '</td>';
+    h += '<td>$' + s.principal.toFixed(2) + '</td>';
+    h += '<td>$' + s.balance.toFixed(2) + '</td></tr>';
+  });
+  h += '</table>';
+  $('scheduleTable').innerHTML = h;
+}
+
+// ── Init ──
+calc();
+</script>
+</body>
+</html>
