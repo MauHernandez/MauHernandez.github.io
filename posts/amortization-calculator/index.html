@@ -4,48 +4,35 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Loan Amortization Calculator — Newton-Raphson Method</title>
+<link rel="stylesheet" href="/assets/posts.css">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap');
-
+/* ── Calculator-only tokens (extend the shared set) ── */
 :root {
-  --bg: #f5f3ee;
-  --bg2: #eae7df;
-  --bg3: #ddd9cf;
-  --card: #ffffff;
-  --text: #2c2a25;
-  --text2: #6b6860;
-  --text3: #9e9a90;
-  --accent: #b45309;
-  --accent2: #d97706;
-  --accent-bg: #fef3c7;
-  --blue: #1e6faf;
-  --blue-bg: #e8f1f8;
-  --green: #15803d;
+  --green:    #15803d;
   --green-bg: #dcfce7;
-  --red: #c0392b;
-  --border: #d8d4cb;
-  --mono: 'JetBrains Mono', monospace;
-  --sans: 'DM Sans', system-ui, sans-serif;
-  --display: 'Fraunces', Georgia, serif;
-  --radius: 10px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --red:      #c0392b;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-  font-family: var(--sans);
+/* ── Nav ── */
+nav {
   background: var(--bg);
-  color: var(--text);
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 2rem;
+  display: flex; align-items: center; justify-content: space-between;
 }
+.nav-back {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--text3);
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  transition: color 0.2s;
+}
+.nav-back:hover { color: var(--accent); }
+.nav-back::before { content: '← '; }
 
-.container {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem 4rem;
-}
+/* ── Container: calculator is denser than article ── */
+.container { padding: 2rem 1.5rem 4rem; }
 
 /* ── Header ── */
 .header {
@@ -69,33 +56,6 @@ body {
   color: var(--text2);
   max-width: 540px;
   margin: 0 auto;
-}
-
-.lang-picker {
-  display: inline-flex;
-  background: var(--bg2);
-  border-radius: 6px;
-  padding: 3px;
-  margin-bottom: 1rem;
-}
-
-.lang-btn {
-  padding: 5px 14px;
-  border: none;
-  background: none;
-  font-family: var(--sans);
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--text2);
-  cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.2s;
-}
-
-.lang-btn.active {
-  background: var(--card);
-  color: var(--text);
-  box-shadow: var(--shadow);
 }
 
 /* ── Input panel ── */
@@ -415,24 +375,66 @@ body {
   line-height: 1.5;
 }
 
+/* ── Summary list (matches article style) ── */
+.summary-list {
+  list-style: none;
+  padding: 0;
+  counter-reset: summary;
+}
+.summary-list li {
+  padding: 1rem 0 1rem 3rem;
+  position: relative;
+  border-bottom: 1px solid var(--border);
+  counter-increment: summary;
+}
+.summary-list li:last-child { border-bottom: none; }
+.summary-list li::before {
+  content: counter(summary);
+  position: absolute;
+  left: 0; top: 1rem;
+  width: 2rem; height: 2rem;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: .85rem;
+}
+
+.divider { border: none; border-top: 1px solid var(--border); margin: 3rem 0; }
+
+.teaser {
+  background: linear-gradient(135deg, var(--blue-bg), var(--accent-bg));
+  padding: 2rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-top: 3rem;
+}
+.teaser h3 { margin-top: 0; color: var(--text); font-family: var(--display); }
+
 /* ── Responsive ── */
 @media (max-width: 640px) {
   .results-row, .compare-grid { grid-template-columns: 1fr; }
-  .input-grid { grid-template-columns: 1fr 1fr; }
+  .input-grid { grid-template-columns: 1fr; }
+  .input-panel { padding: 1.25rem; }
+  .calc-btn { width: 100%; justify-content: center; }
   .chart-box { height: 260px; }
 }
 </style>
 </head>
 <body>
-<div class="container">
-
-<!-- HEADER -->
-<div class="header">
-  <a id="backLink" href="/posts/amortization/" style="display:inline-block;font-size:0.82rem;font-weight:500;color:var(--text2);text-decoration:none;margin-bottom:0.75rem;letter-spacing:0.01em">← Loans and Their Components</a>
+<nav>
+  <a class="nav-back" id="backLink" href="/posts/amortization/">Loans and Their Components</a>
   <div class="lang-picker">
     <button class="lang-btn active" onclick="setLang('en')">EN</button>
     <button class="lang-btn" onclick="setLang('es')">ES</button>
   </div>
+</nav>
+<div class="container">
+
+<!-- HEADER -->
+<div class="header">
   <h1 id="title">Loan Amortization Calculator</h1>
   <p id="subtitle">Understanding Newton-Raphson, day count conventions, and why real payments differ from textbook formulas.</p>
 </div>
@@ -467,7 +469,7 @@ body {
 <!-- COMPARISON -->
 <div id="compSection" class="section">
   <h2 class="section-title" id="comp-title">Spreadsheet vs. Real-World Servicing</h2>
-  <p class="section-desc" id="comp-desc">Spreadsheets keep full floating-point precision internally and only display 2 decimals. Real servicing systems round to the penny at every step, causing cumulative drift.</p>
+  <p class="section-desc" id="comp-desc">Spreadsheets keep full floating-point precision internally and only display 2 decimals. Some servicing systems round to the penny at specific calculation boundaries, while others preserve higher internal precision and round only at presentation or reconciliation points. The important design decision is not whether rounding exists, but where it happens and which value becomes the source of truth.</p>
   <div class="compare-grid" id="compareCards"></div>
 </div>
 
@@ -511,7 +513,17 @@ body {
 <!-- EXPLANATION -->
 <div id="explainSection" class="section">
   <h2 class="section-title" id="explain-title">Why the Final Payment Differs</h2>
-  <div class="note-box" id="explainNote"></div>
+  <ol class="summary-list" id="explainNote"></ol>
+</div>
+
+<!-- TEASER -->
+<hr class="divider">
+<div class="teaser">
+  <h3 id="teaser-title">Read Next</h3>
+  <p id="teaser-desc">How the choice of rounding boundary is a domain decision that belongs in your business layer — not your math library.</p>
+  <p style="margin-top:1.25rem">
+    <a id="teaser-cta" href="/posts/rounding-is-domain-logic/" style="font-family:var(--sans);font-size:1rem;font-weight:600;color:var(--accent);text-decoration:none;border-bottom:2px solid var(--accent2);padding-bottom:1px">Rounding Is Domain Logic →</a>
+  </p>
 </div>
 
 </div>
@@ -526,7 +538,7 @@ const L = {
     lblPv: 'Loan Amount', lblRate: 'Annual Rate (%)', lblTerm: 'Term (years)', lblOrig: 'Origination Date', lblFpd: 'First Payment Date',
     calcBtn: '&#9654; Calculate',
     compTitle: 'Spreadsheet vs. Real-World Servicing',
-    compDesc: 'Spreadsheets keep full floating-point precision internally and only display 2 decimals. Real servicing systems round to the penny at every step, causing cumulative drift.',
+    compDesc: 'Spreadsheets keep full floating-point precision internally and only display 2 decimals. Some servicing systems round to the penny at specific calculation boundaries, while others preserve higher internal precision and round only at presentation or reconciliation points. The important design decision is not whether rounding exists, but where it happens and which value becomes the source of truth.',
     nrTitle: 'Newton-Raphson Convergence',
     nrDesc: 'The 30/360 formula provides the initial guess. Newton-Raphson adjusts it for actual day counts, then a penny-level search finds the cent value that minimizes the last payment difference.',
     chartTitle: 'Penny Search: Last Payment Difference',
@@ -534,7 +546,7 @@ const L = {
     schedTitle: 'Amortization Schedule',
     first6: 'First 6 months', last6: 'Last 6 months', both: 'First 6 + Last 6', all: 'All payments',
     a365: 'Actual/365 — Penny-rounded', a365s: 'Actual/365 — Continuous', t360: '30/360 — Penny-rounded', t360s: '30/360 — Continuous',
-    explainTitle: 'Why the Final Payment Differs',
+    explainTitle: 'Where You Round Changes Everything',
     c30: '30/360', cA365: 'Actual/365',
     formula: 'Formula', rounded: 'Rounded', monthly: 'Monthly payment', allSame: 'All payments identical',
     spreadsheet: 'Spreadsheet mode', servicing: 'Servicing mode',
@@ -542,10 +554,13 @@ const L = {
     lastPmt: 'Last payment', step: 'Step', pmtGuess: 'PMT guess', residual: 'Residual', newPmt: 'New PMT',
     pennySearch: 'Penny search', around: 'around',
     thMo: '#', thDate: 'Date', thDays: 'Days', thPmt: 'Payment', thInt: 'Interest', thPrin: 'Principal', thBal: 'Balance',
-    explainText: (pmt30, bestPmt, diff, nrPmt) => `<strong>30/360 (spreadsheet):</strong> Every payment is \$${pmt30}. Equal 30-day periods + full float precision = zero drift.<br><br><strong>Actual/365 (spreadsheet):</strong> Newton-Raphson finds the continuous payment (\$${nrPmt}). Using actual day counts but full precision at every step, all payments display as the same amount and the balance hits \$0.00. This is what you see in Excel or Google Sheets.<br><br><strong>Actual/365 (real servicing):</strong> The borrower pays exactly \$${bestPmt}. Interest is rounded to the penny each month. Over all periods, the cumulative rounding drift means the final payment differs by \$${diff}. This is normal, expected, and disclosed per TILA.`,
+    explainText: (pmt30, bestPmt, diff, nrPmt) => `<li><strong>No rounding at any step:</strong> Whether using 30/360 (\$${pmt30}) or Actual/365 (\$${nrPmt}), carrying full floating-point precision through every calculation makes all payments appear identical and the balance close to exactly \$0.00. Equal-looking payments are not a property of the day-count method — they are a consequence of never introducing rounding error along the way.</li><li><strong>Rounding to the penny at each step:</strong> The borrower pays \$${bestPmt} every month. Interest is rounded to the cent after each period's calculation. Small errors accumulate across all periods, and the final payment absorbs the cumulative drift — differing by \$${diff} from the standard. This is expected, normal, and disclosed per TILA.</li><li><strong>Where you round is a design decision:</strong> These are not two levels of accuracy — they are two deliberate choices about where in the calculation to introduce rounding. That boundary determines which systems agree with each other. It belongs explicitly in your business logic, not as an implicit side effect of your math library.</li>`,
     noNr: 'No NR needed — closed form',
     precisionNote: 'Full float precision internally. Displays as',
-    backLink: '← Loans and Their Components',
+    backLink: 'Loans and Their Components',
+    teaserTitle: 'Go deeper on that design decision',
+    teaserDesc: 'Where you round, what value becomes the source of truth, and why that choice belongs in your domain model — not buried inside a calculation.',
+    teaserCta: 'Rounding Is Domain Logic →',
   },
   es: {
     title: 'Calculadora de Amortización',
@@ -553,7 +568,7 @@ const L = {
     lblPv: 'Monto del Préstamo', lblRate: 'Tasa Anual (%)', lblTerm: 'Plazo (años)', lblOrig: 'Fecha de Originación', lblFpd: 'Fecha del Primer Pago',
     calcBtn: '&#9654; Calcular',
     compTitle: 'Hoja de Cálculo vs. Servicio Real',
-    compDesc: 'Las hojas de cálculo mantienen precisión flotante completa internamente y solo muestran 2 decimales. Los sistemas reales redondean al centavo en cada paso, causando desviación acumulativa.',
+    compDesc: 'Las hojas de cálculo mantienen precisión flotante completa internamente y solo muestran 2 decimales. Algunos sistemas de administración redondean al centavo en puntos específicos del cálculo, mientras que otros preservan mayor precisión interna y redondean solo en la presentación o en los puntos de conciliación. La decisión de diseño importante no es si existe el redondeo, sino dónde ocurre y qué valor se convierte en la fuente de verdad.',
     nrTitle: 'Convergencia Newton-Raphson',
     nrDesc: 'La fórmula 30/360 da la estimación inicial. Newton-Raphson la ajusta para los días reales, luego una búsqueda al centavo encuentra el valor que minimiza la diferencia del último pago.',
     chartTitle: 'Búsqueda al Centavo: Diferencia del Último Pago',
@@ -561,7 +576,7 @@ const L = {
     schedTitle: 'Tabla de Amortización',
     first6: 'Primeros 6 meses', last6: 'Últimos 6 meses', both: 'Primeros 6 + Últimos 6', all: 'Todos los pagos',
     a365: 'Actual/365 — Redondeado al centavo', a365s: 'Actual/365 — Continuo', t360: '30/360 — Redondeado al centavo', t360s: '30/360 — Continuo',
-    explainTitle: 'Por Qué el Último Pago Difiere',
+    explainTitle: 'Dónde Redondeas Lo Cambia Todo',
     c30: '30/360', cA365: 'Actual/365',
     formula: 'Fórmula', rounded: 'Redondeado', monthly: 'Pago mensual', allSame: 'Todos los pagos iguales',
     spreadsheet: 'Modo hoja de cálculo', servicing: 'Modo servicio',
@@ -569,10 +584,13 @@ const L = {
     lastPmt: 'Último pago', step: 'Paso', pmtGuess: 'Estimación', residual: 'Residual', newPmt: 'Nuevo PMT',
     pennySearch: 'Búsqueda centavo', around: 'alrededor de',
     thMo: '#', thDate: 'Fecha', thDays: 'Días', thPmt: 'Pago', thInt: 'Interés', thPrin: 'Capital', thBal: 'Saldo',
-    explainText: (pmt30, bestPmt, diff, nrPmt) => `<strong>30/360 (hoja de cálculo):</strong> Todos los pagos son \$${pmt30}. Períodos iguales de 30 días + precisión flotante = cero desviación.<br><br><strong>Actual/365 (hoja de cálculo):</strong> Newton-Raphson encuentra el pago continuo (\$${nrPmt}). Usando días reales pero precisión completa en cada paso, todos los pagos se muestran iguales y el saldo llega a \$0.00. Esto es lo que ves en Excel o Google Sheets.<br><br><strong>Actual/365 (servicio real):</strong> El prestatario paga exactamente \$${bestPmt}. El interés se redondea al centavo cada mes. La desviación acumulativa significa que el pago final difiere por \$${diff}. Esto es normal, esperado, y se divulga según TILA.`,
+    explainText: (pmt30, bestPmt, diff, nrPmt) => `<li><strong>Sin redondeo en ningún paso:</strong> Ya sea con 30/360 (\$${pmt30}) o Real/365 (\$${nrPmt}), mantener precisión flotante completa en cada cálculo hace que todos los pagos aparezcan idénticos y el saldo cierre exactamente en \$0.00. Los pagos iguales no son una propiedad del método de conteo de días — son consecuencia de no introducir error de redondeo en el camino.</li><li><strong>Redondeo al centavo en cada paso:</strong> El prestatario paga \$${bestPmt} cada mes. El interés se redondea al centavo después del cálculo de cada periodo. Los pequeños errores se acumulan a lo largo de todos los periodos, y el pago final absorbe la desviación acumulada — difiriendo por \$${diff} del estándar. Esto es normal, esperado y se divulga según TILA.</li><li><strong>Dónde redondeas es una decisión de diseño:</strong> No son dos niveles de precisión — son dos elecciones deliberadas sobre en qué punto del cálculo introducir el redondeo. Esa frontera determina qué sistemas coinciden entre sí. Debe estar explícitamente en tu lógica de negocio, no como un efecto secundario implícito de tu biblioteca matemática.</li>`,
     noNr: 'No necesita NR — fórmula cerrada',
     precisionNote: 'Precisión flotante completa internamente. Se muestra como',
-    backLink: '← Préstamos y sus Partes',
+    backLink: 'Préstamos y sus Partes',
+    teaserTitle: 'Profundiza en esa decisión de diseño',
+    teaserDesc: 'Dónde redondeas, qué valor se convierte en la fuente de verdad, y por qué esa elección pertenece a tu modelo de dominio — no enterrada dentro de un cálculo.',
+    teaserCta: 'El Redondeo Es Lógica de Dominio →',
   }
 };
 
@@ -606,6 +624,9 @@ function setLang(l) {
   document.getElementById('opt-30360').textContent = t('t360');
   document.getElementById('opt-30360s').textContent = t('t360s');
   document.getElementById('explain-title').textContent = t('explainTitle');
+  document.getElementById('teaser-title').textContent = t('teaserTitle');
+  document.getElementById('teaser-desc').textContent = t('teaserDesc');
+  document.getElementById('teaser-cta').textContent = t('teaserCta');
   document.getElementById('backLink').textContent = t('backLink');
   calc();
 }

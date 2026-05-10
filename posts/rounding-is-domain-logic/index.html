@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rounding Is Domain Logic</title>
+<link rel="stylesheet" href="/assets/posts.css">
+<style>
+/* ── Page-specific tokens ── */
+:root {
+  --model-a:    #c0392b;
+  --model-a-bg: #fdf2f1;
+}
+
+html { scroll-behavior: smooth; }
+
+/* ── Nav ── */
+nav {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.nav-back {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--text3);
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  transition: color 0.2s;
+}
+.nav-back:hover { color: var(--accent); }
+.nav-back::before { content: '← '; }
+
+/* ── Article header ── */
+header {
+  max-width: 960px;
+  margin: 4rem auto 3rem;
+  padding: 0 1.5rem;
+}
+
+.series-tag {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.25rem;
+}
+
+h1 {
+  font-family: var(--display);
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text);
+  margin-bottom: 1rem;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: var(--text2);
+  font-style: italic;
+  border-left: 2px solid var(--accent);
+  padding-left: 1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.header-rule {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2rem 0 0;
+}
+
+/* ── Main content column ── */
+main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1.5rem 6rem;
+}
+
+/* ── Typography ── */
+p { margin-bottom: 1.25rem; }
+
+h2 {
+  font-family: var(--display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 3rem 0 1rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
+}
+
+h3 {
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text2);
+  margin: 2rem 0 0.75rem;
+}
+
+ul, ol { margin: 0.5rem 0 1.25rem 1.5rem; }
+li { margin-bottom: 0.3rem; }
+strong { font-weight: 600; }
+em { font-style: italic; }
+
+.lead {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--text2);
+  margin-bottom: 1.5rem;
+}
+
+.callout {
+  background: var(--bg2);
+  border-left: 3px solid var(--accent);
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  font-size: 0.92rem;
+  color: var(--text2);
+}
+
+/* ── Code ── */
+pre, code { font-family: var(--mono); }
+
+code {
+  font-size: 0.82rem;
+  background: var(--bg2);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  color: var(--text2);
+}
+
+pre {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin: 1rem 0 1.5rem;
+  overflow-x: auto;
+  font-size: 0.78rem;
+  line-height: 1.7;
+  color: var(--text2);
+}
+pre code { background: none; padding: 0; }
+
+/* ── Model comparison grid ── */
+.models-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.model-block {
+  border-radius: var(--radius);
+  padding: 1.1rem 1.25rem;
+}
+.model-block.a { background: var(--model-a-bg); border: 1px solid #e8c4c1; }
+.model-block.b { background: var(--blue-bg); border: 1px solid var(--border); }
+
+.model-label {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.model-block.a .model-label { color: var(--model-a); }
+.model-block.b .model-label { color: var(--blue); }
+
+.model-block pre {
+  background: rgba(255,255,255,0.6);
+  border-color: transparent;
+  margin: 0;
+  font-size: 0.74rem;
+}
+
+/* ── Flow diagram ── */
+.flow {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem;
+  margin: 0.75rem 0 1.25rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+}
+.flow-step {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 0.25rem 0.6rem;
+  border-radius: 3px;
+  color: var(--text2);
+}
+.flow-arrow { color: var(--text3); font-size: 0.9rem; }
+.flow-step.highlight {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* ── SVG chart ── */
+.chart-wrap {
+  margin: 1.5rem 0 2rem;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+.chart-title {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* ── Section number ── */
+.section-number {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+/* ── Interactive comparison table ── */
+.comparison-wrap {
+  margin: 2rem 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.comparison-controls {
+  display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+  padding: 1rem 1.25rem;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.82rem;
+}
+.comparison-controls label { color: var(--text3); font-size: 0.78rem; }
+.comparison-controls input {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  width: 90px;
+  color: var(--text);
+}
+
+.run-btn {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  background: var(--text);
+  color: var(--bg);
+  border: none;
+  padding: 0.35rem 0.9rem;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.run-btn:hover { background: var(--accent); }
+
+.table-scroll { overflow-x: auto; }
+
+table {
+  width: 100%; border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 0.73rem;
+}
+thead tr { background: var(--bg2); }
+th {
+  padding: 0.5rem 0.75rem;
+  text-align: right;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--text3);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+th:first-child { text-align: center; }
+th.model-a-col { color: var(--model-a); }
+th.model-b-col { color: var(--blue); }
+th.delta-col { color: var(--text3); }
+
+td {
+  padding: 0.45rem 0.75rem;
+  text-align: right;
+  border-bottom: 1px solid var(--bg2);
+  color: var(--text2);
+}
+td:first-child { text-align: center; color: var(--text3); }
+tr:last-child td { border-bottom: none; }
+tr.final-row td { font-weight: 500; background: var(--accent-bg); }
+
+.delta-positive { color: var(--model-a); }
+.delta-zero { color: var(--text3); }
+
+.table-legend {
+  display: flex; gap: 1.5rem; padding: 0.75rem 1.25rem;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  font-size: 0.72rem;
+  color: var(--text3);
+  font-family: var(--mono);
+}
+.legend-dot {
+  display: inline-block; width: 8px; height: 8px;
+  border-radius: 50%; margin-right: 0.35rem; vertical-align: middle;
+}
+
+/* ── Footer ── */
+footer {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.82rem;
+  color: var(--text3);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.footer-series {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+}
+.footer-series a {
+  color: var(--text3); text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-series a:hover { color: var(--accent); }
+
+@media (max-width: 640px) {
+  .models-grid { grid-template-columns: 1fr; }
+  nav { padding: 0.75rem 1rem; }
+  header, main, footer { padding-left: 1rem; padding-right: 1rem; }
+
+  /* SVG chart: scroll instead of shrinking to unreadable size */
+  .chart-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 1rem 0.75rem; }
+  #chart4 { width: 580px !important; min-width: 580px; height: auto; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-back" href="/posts/amortization-calculator/" data-i18n="nav_back"></a>
+  <div class="lang-picker">
+    <button class="lang-btn active" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" onclick="setLang('es')">ES</button>
+  </div>
+</nav>
+
+<header>
+  <p class="series-tag" data-i18n="series_tag"></p>
+  <h1 data-i18n="title"></h1>
+  <p class="subtitle" data-i18n="subtitle"></p>
+  <hr class="header-rule">
+</header>
+
+<main>
+
+  <!-- INTRO -->
+  <p class="lead" data-i18n="intro_lead"></p>
+  <p data-i18n="intro_p1"></p>
+  <p data-i18n="intro_p2"></p>
+  <ul id="intro-list"></ul>
+  <p data-i18n="intro_p3"></p>
+  <div class="callout" data-i18n="intro_callout"></div>
+
+  <!-- §1 -->
+  <h2><span class="section-number" data-i18n="s1_num"></span><span data-i18n="s1_title"></span></h2>
+  <p data-i18n="s1_p1"></p>
+  <p data-i18n="s1_p2"></p>
+  <p data-i18n="s1_interp1_label"></p>
+  <pre id="s1_display_ex"></pre>
+  <p data-i18n="s1_interp1_desc"></p>
+  <p data-i18n="s1_interp2_label"></p>
+  <pre id="s1_internal_ex"></pre>
+  <p data-i18n="s1_interp2_desc"></p>
+  <p data-i18n="s1_problem"></p>
+  <p data-i18n="s1_why"></p>
+  <ul id="s1-list"></ul>
+
+  <!-- §2 -->
+  <h2><span class="section-number" data-i18n="s2_num"></span><span data-i18n="s2_title"></span></h2>
+  <p data-i18n="s2_p1"></p>
+  <p data-i18n="s2_p2"></p>
+  <div class="models-grid">
+    <div class="model-block a">
+      <p class="model-label" data-i18n="modelA_label"></p>
+      <pre id="modelA_code"></pre>
+    </div>
+    <div class="model-block b">
+      <p class="model-label" data-i18n="modelB_label"></p>
+      <pre id="modelB_code"></pre>
+    </div>
+  </div>
+  <p data-i18n="s2_insight"></p>
+
+  <!-- §3 -->
+  <h2><span class="section-number" data-i18n="s3_num"></span><span data-i18n="s3_title"></span></h2>
+  <p data-i18n="s3_p1"></p>
+  <p data-i18n="s3_p2"></p>
+  <p data-i18n="s3_p3"></p>
+  <p data-i18n="s3_opt1_label"></p>
+  <div class="flow" id="flow1"></div>
+  <p data-i18n="s3_opt2_label"></p>
+  <div class="flow" id="flow2"></div>
+  <p data-i18n="s3_notequiv"></p>
+  <p data-i18n="s3_opt1_desc"></p>
+  <p data-i18n="s3_opt2_desc"></p>
+  <p data-i18n="s3_conclusion"></p>
+
+  <!-- §4 -->
+  <h2><span class="section-number" data-i18n="s4_num"></span><span data-i18n="s4_title"></span></h2>
+  <p data-i18n="s4_p1"></p>
+  <p data-i18n="s4_p2"></p>
+  <p data-i18n="s4_p3"></p>
+  <ul id="s4-list"></ul>
+  <p data-i18n="s4_formula"></p>
+  <pre id="s4_formula_code"></pre>
+  <p data-i18n="s4_varies"></p>
+
+  <!-- §4 GRAPH -->
+  <div class="chart-wrap">
+    <p class="chart-title" data-i18n="chart4_title"></p>
+    <svg id="chart4" viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;"></svg>
+    <p style="font-size:0.72rem;color:var(--text3);text-align:center;margin-top:0.75rem;font-family:var(--mono);" data-i18n="chart4_caption"></p>
+  </div>
+
+  <p data-i18n="s4_distinction"></p>
+  <div class="callout" data-i18n="s4_callout"></div>
+
+  <!-- §5 -->
+  <h2><span class="section-number" data-i18n="s5_num"></span><span data-i18n="s5_title"></span></h2>
+  <p data-i18n="s5_p1"></p>
+  <pre id="s5_drift_code"></pre>
+  <p data-i18n="s5_p2"></p>
+  <p data-i18n="s5_p3"></p>
+  <p data-i18n="s5_p4"></p>
+
+  <!-- §6 -->
+  <h2><span class="section-number" data-i18n="s6_num"></span><span data-i18n="s6_title"></span></h2>
+  <p data-i18n="s6_p1"></p>
+  <pre id="s6_code"></pre>
+  <p data-i18n="s6_p2"></p>
+  <p data-i18n="s6_key"></p>
+  <div class="callout" data-i18n="s6_callout"></div>
+  <p data-i18n="s6_boundaries_intro"></p>
+  <ul id="s6-list"></ul>
+  <p data-i18n="s6_conclusion"></p>
+
+  <!-- §5–6 INTERACTIVE -->
+  <div class="comparison-wrap">
+    <div class="comparison-controls">
+      <div>
+        <label data-i18n="ctrl_principal"></label><br>
+        <input type="number" id="inp_principal" value="50000" min="1000" max="1000000" step="1000">
+      </div>
+      <div>
+        <label data-i18n="ctrl_rate"></label><br>
+        <input type="number" id="inp_rate" value="7.5" min="0.1" max="30" step="0.1">
+      </div>
+      <div>
+        <label data-i18n="ctrl_term"></label><br>
+        <input type="number" id="inp_term" value="24" min="6" max="360" step="6">
+      </div>
+      <button class="run-btn" onclick="buildTable()" data-i18n="ctrl_run"></button>
+    </div>
+    <div class="table-scroll">
+      <table id="comparison-table">
+        <thead><tr id="table-header"></tr></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+    <div class="table-legend">
+      <span><span class="legend-dot" style="background:var(--model-a)"></span><span data-i18n="legend_a"></span></span>
+      <span><span class="legend-dot" style="background:var(--blue)"></span><span data-i18n="legend_b"></span></span>
+    </div>
+  </div>
+
+  <!-- §7 -->
+  <h2><span class="section-number" data-i18n="s7_num"></span><span data-i18n="s7_title"></span></h2>
+  <p data-i18n="s7_p1"></p>
+
+  <h3 data-i18n="s7_sot_title"></h3>
+  <p data-i18n="s7_sot_q"></p>
+  <ul id="s7-sot-list"></ul>
+  <p data-i18n="s7_sot_note"></p>
+
+  <h3 data-i18n="s7_pb_title"></h3>
+  <p data-i18n="s7_pb_intro"></p>
+  <ul id="s7-pb-list"></ul>
+  <p data-i18n="s7_pb_note"></p>
+
+  <h3 data-i18n="s7_decimal_title"></h3>
+  <p data-i18n="s7_decimal_p1"></p>
+  <p data-i18n="s7_decimal_p2"></p>
+  <pre id="s7_decimal_code"></pre>
+  <p data-i18n="s7_decimal_note"></p>
+
+  <h3 data-i18n="s7_sep_title"></h3>
+  <p data-i18n="s7_sep_p"></p>
+  <p data-i18n="s7_sep_trap"></p>
+  <pre id="s7_sep_code"></pre>
+  <p data-i18n="s7_sep_first"></p>
+  <p data-i18n="s7_sep_second"></p>
+  <p data-i18n="s7_sep_conclusion"></p>
+
+  <h3 data-i18n="s7_final_title"></h3>
+  <p data-i18n="s7_final_p"></p>
+  <p data-i18n="s7_final_rule"></p>
+
+  <!-- §8 -->
+  <h2><span class="section-number" data-i18n="s8_num"></span><span data-i18n="s8_title"></span></h2>
+  <p data-i18n="s8_p1"></p>
+
+  <h3 data-i18n="s8_display_title"></h3>
+  <p data-i18n="s8_display_p"></p>
+  <pre id="s8_display_code"></pre>
+  <p data-i18n="s8_display_note"></p>
+
+  <h3 data-i18n="s8_balance_title"></h3>
+  <p data-i18n="s8_balance_p"></p>
+  <pre id="s8_balance_code"></pre>
+
+  <h3 data-i18n="s8_recon_title"></h3>
+  <p data-i18n="s8_recon_p"></p>
+  <pre id="s8_recon_code"></pre>
+
+  <h3 data-i18n="s8_final_title"></h3>
+  <p data-i18n="s8_final_p"></p>
+  <pre id="s8_final_code"></pre>
+
+  <h3 data-i18n="s8_edge_title"></h3>
+  <p data-i18n="s8_edge_p"></p>
+  <ul id="s8-edge-list"></ul>
+
+  <h3 data-i18n="s8_strat_title"></h3>
+  <p data-i18n="s8_strat_p"></p>
+  <ul id="s8-strat-list"></ul>
+
+  <!-- §9 -->
+  <h2><span class="section-number" data-i18n="s9_num"></span><span data-i18n="s9_title"></span></h2>
+  <p data-i18n="s9_p1"></p>
+  <p data-i18n="s9_p2"></p>
+  <p data-i18n="s9_p3"></p>
+  <div class="callout" data-i18n="s9_callout"></div>
+  <p data-i18n="s9_p4"></p>
+  <p data-i18n="s9_p5"></p>
+
+  <!-- CLOSING -->
+  <h2 data-i18n="closing_title"></h2>
+  <p data-i18n="closing_p1"></p>
+  <p data-i18n="closing_p2"></p>
+  <p data-i18n="closing_p3"></p>
+
+</main>
+
+<footer>
+  <div class="footer-series">
+    <a href="/posts/amortization/" data-i18n="footer_art1"></a> ·
+    <a href="/posts/amortization-calculator/" data-i18n="footer_art2"></a>
+  </div>
+  <span style="font-size:0.7rem;color:var(--border)">③</span>
+</footer>
+
+<script>
+// ------------------------------------------------------------
+// TRANSLATIONS
+// ------------------------------------------------------------
+const T = {
+  en: {
+    nav_back: `Loan Amortization Calculator`,
+    series_tag: `Amortization Series · Part III`,
+    title: `Rounding Is Domain Logic`,
+    subtitle: `A software engineering perspective on precision boundaries, source of truth, and why rounding is a domain decision -- not a formatting detail.`,
+    intro_lead: `Equal payments sound simple until you implement them.`,
+    intro_p1: `At first, it is tempting to think of a monthly loan payment as a single number: $XXX.YY. A borrower sees one amount on a statement. A product requirement may say that all monthly payments should be the same. A calculator may produce a clean result. A spreadsheet may show a neat schedule.`,
+    intro_p2: `But in a financial system, that "same payment" may exist at more than one level of precision. There may be:`,
+    intro_list: [
+      "a high-precision payment calculated by a formula,",
+      "a two-decimal payment displayed to the borrower,",
+      "a value used internally to compute interest and principal allocation,",
+      "a value used for reconciliation, servicing, accounting, or payoff logic."
+    ],
+    intro_p3: `Those are related, but they are not always the same thing. This article is the conclusion of my exploration into amortization schedules, day-count conventions, Newton-Raphson calculations, direct derivatives, and penny-level drift. The main lesson is simple:`,
+    intro_callout: `In financial systems, rounding is not merely formatting. It is domain logic.`,
+
+    s1_num: `§ 01`,
+    s1_title: `The ambiguity of "same payment"`,
+    s1_p1: `When we say that a loan has "equal monthly payments," what exactly do we mean?`,
+    s1_p2: `There are at least two possible interpretations.`,
+    s1_interp1_label: `The first interpretation is display equality:`,
+    s1_display_ex: `Payment 1: $523.41\nPayment 2: $523.41\nPayment 3: $523.41\n...`,
+    s1_interp1_desc: `From the borrower's perspective, these payments are equal. The same amount appears every month.`,
+    s1_interp2_label: `The second interpretation is internal equality:`,
+    s1_internal_ex: `Payment 1: 523.4149261837\nPayment 2: 523.4149261837\nPayment 3: 523.4149261837\n...`,
+    s1_interp2_desc: `From the system's perspective, these payments are also equal, but at a much higher precision.`,
+    s1_problem: `The subtle problem is that these two ideas can diverge. A payment displayed as $523.41 may actually be backed by an internal value like 523.4149261837. If the system uses the high-precision value internally and only rounds for presentation, the schedule behaves differently than if the system first rounds the payment to $523.41 and then uses that rounded value for every calculation. Both approaches can look reasonable. Both can be explained mathematically. But they produce different amortization behavior.`,
+    s1_why: `That is why "same payment" is not precise enough as an implementation requirement. A better requirement would specify:`,
+    s1_list: [
+      "same at what precision,",
+      "same for whom,",
+      "same in which layer of the system,",
+      "same before or after rounding,",
+      "and which value becomes the source of truth for the next calculation."
+    ],
+
+    s2_num: `§ 02`,
+    s2_title: `The hidden variable: when rounding happens`,
+    s2_p1: `The most important question is not just what is the payment?`,
+    s2_p2: `It is: when is the payment rounded, and is the rounded value used for subsequent calculations? Consider two simplified models.`,
+    modelA_label: `Model A · Round first`,
+    modelA_code: `Calculated: 523.4149261837\nRounded:    523.41\nInternal:   523.41\nDisplayed:  523.41`,
+    modelB_label: `Model B · Preserve precision`,
+    modelB_code: `Calculated: 523.4149261837\nInternal:   523.4149261837\nDisplayed:  523.41`,
+    s2_insight: `In Model A, the system uses $523.41 for every period's interest, principal, and balance. Simple and intuitive -- but introduces a small, permanent gap between the ideal payment and the value actually used. In Model B, the borrower still sees $523.41, but the schedule runs on the full-precision value. The important insight: $523.41 may be a display representation, not the computational source of truth. That distinction changes everything.`,
+
+    s3_num: `§ 03`,
+    s3_title: `Rounded input vs. rounded output`,
+    s3_p1: `A common trap in amortization modeling is to treat the displayed payment as the real payment.`,
+    s3_p2: `That is natural because money is usually represented in cents. Borrowers pay cents. Statements display cents. Ledger entries often settle in cents.`,
+    s3_p3: `But formulas do not naturally stop at cents. They produce decimal values with more precision than any currency field can display -- this is the nature of floating-point arithmetic. A computed payment of 523.4149261837 is not a rounded number waiting to be truncated; it is the exact result of the formula at full precision. So there is a design choice:`,
+    s3_opt1_label: `Option 1:`,
+    s3_flow1: ["Formula", "high-precision payment", "round", "use rounded internally"],
+    s3_opt2_label: `Option 2:`,
+    s3_flow2: ["Formula", "high-precision payment", "use high precision internally", "round for display"],
+    s3_notequiv: `Those options are not equivalent.`,
+    s3_opt1_desc: `In the first option, rounding becomes an input to the amortization schedule. It changes future balances.`,
+    s3_opt2_desc: `In the second option, rounding becomes an output boundary. It changes what people see, but does not change the internal math at each step.`,
+    s3_conclusion: `That difference is why rounding cannot be treated as a minor formatting detail. It is a domain decision.`,
+
+    s4_num: `§ 04`,
+    s4_title: `Day-count conventions: 30/360 vs. Actual/365`,
+    s4_p1: `Day-count conventions add another layer of complexity.`,
+    s4_p2: `A 30/360 convention treats each month as if it has 30 days and each year as if it has 360 days. This creates uniform periods for many monthly loan calculations -- a regular loan. Actual/365 uses the actual number of days in each period over a 365-day year. One period may accrue interest for 28 days, another for 30, another for 31. This is an irregular loan.`,
+    s4_p3: `This matters because interest allocation changes by period. Different actual-day conventions answer this slightly differently:`,
+    s4_list: [
+      "<strong>Actual/365</strong>: uses the actual number of days in the period over a fixed 365-day denominator. Simple and common.",
+      "<strong>Actual/Actual ISDA</strong>: uses actual days and allocates across the actual year length. Days in a non-leap year are divided by 365; days in a leap year by 366. Periods crossing a year boundary may be split."
+    ],
+    s4_formula: `Under a simple Actual/X convention, the interest factor depends on actual days in the period:`,
+    s4_formula_code: `period interest factor = annual rate × actual days / days in year`,
+    s4_varies: `So even if the displayed payment is the same every month, the split between interest and principal can vary. A longer period accrues more interest. A shorter period accrues less. The payment may remain visually equal while the allocation inside it changes.`,
+    chart4_title: `Same loan · Same payment · How the interest/principal split shifts by convention`,
+    chart4_caption: `Principal $50,000 · 7.5% annual rate · 24 months. The dashed line marks the same monthly payment across all three bars. Under Actual/365, more days in the period = more interest accrued = less principal paid. The payment stays the same; the split inside it changes.`,
+    s4_distinction: `This leads to an important distinction: the day-count convention affects interest allocation. Precision and rounding rules affect whether equal displayed payments can be preserved cleanly. It is easy to confuse those two.`,
+    s4_callout: `A schedule may fail to reconcile not because equal payments are impossible, but because the implementation rounded too early, used the wrong value as source of truth, or mixed display precision with calculation precision.`,
+
+    s5_num: `§ 05`,
+    s5_title: `Why a rounded payment can create drift`,
+    s5_p1: `Suppose the mathematically ideal payment is 523.4149261837. If the system rounds this to 523.41, the difference is 0.0049261837 -- less than half a cent.`,
+    s5_drift_code: `Ideal:   523.4149261837\nRounded: 523.41\nGap:       0.0049261837  (<½ cent)`,
+    s5_p2: `But amortization is iterative. Each period depends on the previous balance. If the payment is slightly lower than the ideal high-precision value, the principal reduction is slightly lower. That leaves a slightly higher balance. A slightly higher balance can produce slightly higher interest in the next period. The effect compounds through the schedule.`,
+    s5_p3: `This does not necessarily create a huge error, but it can create enough drift that the final payment differs from the standard payment, or the final balance needs an explicit adjustment.`,
+    s5_p4: `That drift is not random. It is the consequence of a modeling decision: the system chose to use the rounded value as a computational input.`,
+
+    s6_num: `§ 06`,
+    s6_title: `How high-precision internal payments preserve equal displayed payments`,
+    s6_p1: `Now consider the alternative. The system calculates the payment with high precision and keeps that value internally:`,
+    s6_code: `Internal payment:  523.4149261837\nDisplayed payment: $523.41`,
+    s6_p2: `Each period uses the internal payment value for the amortization calculation. The displayed schedule still shows $523.41, but the internal balance evolves according to the more precise payment.`,
+    s6_key: `The key idea: the payment shown is not always the payment used internally.`,
+    s6_callout: `That can feel counterintuitive at first because money is paid in cents. But many systems preserve more precision during calculation and only round at explicitly defined boundaries.`,
+    s6_boundaries_intro: `Those boundaries matter. For example:`,
+    s6_list: [
+      "round only for display,",
+      "round when posting a ledger transaction,",
+      "round when generating a borrower-facing statement,",
+      "round when computing final payoff,",
+      "round principal and interest separately,",
+      "round only the total payment,",
+      "preserve high precision until the final reconciliation step."
+    ],
+    s6_conclusion: `Each choice creates a different schedule. None of these choices should be accidental.`,
+
+    ctrl_principal: `Principal ($)`,
+    ctrl_rate: `Annual Rate (%)`,
+    ctrl_term: `Term (months)`,
+    ctrl_run: `▶ Run`,
+    legend_a: `Model A (round first)`,
+    legend_b: `Model B (high precision)`,
+    th_period: `#`,
+    th_a_balance: `Balance A`,
+    th_b_balance: `Balance B`,
+    th_delta: `Δ Drift`,
+    th_a_interest: `Interest A`,
+    th_b_interest: `Interest B`,
+
+    s7_num: `§ 07`,
+    s7_title: `Implementation considerations`,
+    s7_p1: `From a software engineering perspective, the core lesson is that amortization is not just a formula. It is a set of domain rules. A robust implementation should define the following explicitly.`,
+    s7_sot_title: `Source of truth`,
+    s7_sot_q: `Which value is authoritative?`,
+    s7_sot_list: [
+      "the high-precision formula result,",
+      "the rounded displayed payment,",
+      "the ledger-posted amount,",
+      "the contractual payment amount,",
+      "the servicing-system amount,",
+      "the final reconciled amount?"
+    ],
+    s7_sot_note: `Different systems may need different answers. The problem is not that one answer is universally correct. The problem is leaving the answer implicit.`,
+    s7_pb_title: `Precision boundaries`,
+    s7_pb_intro: `Where does the system preserve precision, and where does it round? Possible boundaries include:`,
+    s7_pb_list: [
+      "after calculating the monthly payment,",
+      "after calculating period interest,",
+      "after calculating principal,",
+      "after updating balance,",
+      "when displaying values,",
+      "when posting transactions,",
+      "when reconciling the final payment."
+    ],
+    s7_pb_note: `Each boundary should be intentional.`,
+    s7_decimal_title: `Decimal math`,
+    s7_decimal_p1: `Financial calculations should avoid binary floating-point types for money-sensitive calculations. A decimal type, fixed-point representation, or domain-specific money type is usually safer.`,
+    s7_decimal_p2: `The important point is not only the data type, but also the rounding mode and scale. For example:`,
+    s7_decimal_code: `amount.round(scale: 2, mode: HALF_UP)\namount.round(scale: 10, mode: HALF_EVEN)`,
+    s7_decimal_note: `Those choices should be named and tested.`,
+    s7_sep_title: `Separation between domain and presentation`,
+    s7_sep_p: `Formatting a number for display is not the same as defining the value used by the domain model.`,
+    s7_sep_trap: `This is the trap:`,
+    s7_sep_code: `display(payment)    -> "$523.41"   // changes representation\npayment = round(payment, 2)      // changes the value`,
+    s7_sep_first: `The first changes representation.`,
+    s7_sep_second: `The second changes the value.`,
+    s7_sep_conclusion: `In financial systems, that distinction is fundamental.`,
+    s7_final_title: `Final reconciliation`,
+    s7_final_p: `Even with careful precision handling, many schedules need explicit final-period behavior. The final payment may need to close the remaining balance. The system may need to reconcile principal, interest, fees, and rounding residuals. The product may define whether the last payment can differ, whether the difference is absorbed somewhere else, or whether the schedule is adjusted earlier.`,
+    s7_final_rule: `That behavior should not be left to incidental arithmetic. It should be a business rule.`,
+
+    s8_num: `§ 08`,
+    s8_title: `Tests worth writing`,
+    s8_p1: `The tests for an amortization system should do more than check that the formula returns a plausible payment. They should test the invariants the business actually cares about.`,
+    s8_display_title: `Display equality`,
+    s8_display_p: `If the product promises equal displayed payments, test that the borrower-facing payments are equal at the display precision.`,
+    s8_display_code: `displayedPayment(period_1) == displayedPayment(period_2)`,
+    s8_display_note: `But be explicit that this is display equality, not necessarily internal equality.`,
+    s8_balance_title: `Internal balance consistency`,
+    s8_balance_p: `Test that the internal balance evolves as expected under the chosen precision model.`,
+    s8_balance_code: `starting_balance\n- principal_component\n= ending_balance`,
+    s8_recon_title: `Total principal and interest reconciliation`,
+    s8_recon_p: `Across the full schedule:`,
+    s8_recon_code: `sum(principal) ≈ original_principal\nsum(interest)  ≈ expected_total_interest`,
+    s8_final_title: `Final balance`,
+    s8_final_p: `The schedule should end correctly.`,
+    s8_final_code: `final_balance == 0\n// or, if high precision is preserved:\nfinal_balance within accepted tolerance before final adjustment`,
+    s8_edge_title: `Day-count edge cases`,
+    s8_edge_p: `Test period lengths that commonly expose assumptions:`,
+    s8_edge_list: [
+      "February,",
+      "31-day months,",
+      "odd first payment periods,",
+      "leap years if relevant,",
+      "short final periods,",
+      "long terms,",
+      "high interest rates,",
+      "very small principal amounts,",
+      "early payoffs."
+    ],
+    s8_strat_title: `Rounding strategy comparisons`,
+    s8_strat_p: `For educational and debugging purposes, compare multiple strategies side by side:`,
+    s8_strat_list: [
+      "round payment first,",
+      "preserve internal precision,",
+      "round interest each period,",
+      "round principal each period,",
+      "adjust only the final payment."
+    ],
+
+    s9_num: `§ 09`,
+    s9_title: `The deeper lesson`,
+    s9_p1: `The hardest part of implementing amortization is not always the formula.`,
+    s9_p2: `Often, it is deciding which number is real. Is the real payment the high-precision result of the formula? The displayed two-decimal amount? The amount used to compute the next balance? The amount posted to a ledger? The amount expected by an external system?`,
+    s9_p3: `Until those boundaries are explicit, two implementations can both look mathematically reasonable and still produce different schedules.`,
+    s9_callout: `That is why rounding belongs in the domain model. It should be named, tested, documented, and treated as a business rule -- not left as an incidental formatting detail.`,
+    s9_p4: `Equal payments are not just a mathematical property. They are a product promise implemented through precision rules, rounding boundaries, and source-of-truth decisions.`,
+    s9_p5: `The formula matters. But the model around the formula matters just as much.`,
+
+    closing_title: `Closing thought`,
+    closing_p1: `This exploration changed how I think about financial software.`,
+    closing_p2: `At the beginning, it was easy to focus on the visible behavior: whether payments looked equal, whether the final payment drifted, whether 30/360 behaved differently from Actual/365.`,
+    closing_p3: `But the more important lesson was underneath the numbers. A financial calculation is not only a calculation. It is a chain of decisions about representation, precision, timing, and truth. And once money enters the system, those decisions are no longer implementation details. They are the product.`,
+
+    footer_art1: `Part I: Loans and Their Parts`,
+    footer_art2: "Part II: Amortization Calculator"
+  },
+
+  es: {
+    nav_back: `Calculadora de Amortización`,
+    series_tag: `Serie de Amortización · Parte III`,
+    title: `El Redondeo es Lógica de Dominio`,
+    subtitle: `Una perspectiva de ingeniería de software sobre fronteras de precisión, fuente de verdad, y por qué el redondeo es una decisión de dominio -- no un detalle de formato.`,
+    intro_lead: `Los pagos iguales parecen simples hasta que los implementas.`,
+    intro_p1: `Al principio, es tentador pensar en el pago mensual de un préstamo como un único número: $XXX.YY. El prestatario ve una cifra en su estado de cuenta. Un requisito de producto puede indicar que todos los pagos mensuales deben ser iguales. Una calculadora puede producir un resultado limpio. Una hoja de cálculo puede mostrar un calendario ordenado.`,
+    intro_p2: `Pero en un sistema financiero, ese "mismo pago" puede existir en más de un nivel de precisión. Puede haber:`,
+    intro_list: [
+      "un pago de alta precisión calculado por una fórmula,",
+      "un pago de dos decimales mostrado al prestatario,",
+      "un valor usado internamente para calcular intereses y amortización de capital,",
+      "un valor usado para conciliación, administración, contabilidad o lógica de liquidación."
+    ],
+    intro_p3: `Estos están relacionados, pero no siempre son lo mismo. Este artículo es la conclusión de mi exploración sobre calendarios de amortización, convenciones de conteo de días, cálculos Newton-Raphson, derivadas directas y deriva a nivel de centavo. La lección principal es simple:`,
+    intro_callout: `En sistemas financieros, el redondeo no es solo formato. Es lógica de dominio.`,
+
+    s1_num: `§ 01`,
+    s1_title: `La ambigüedad del "mismo pago"`,
+    s1_p1: `Cuando decimos que un préstamo tiene "pagos mensuales iguales", ¿qué queremos decir exactamente?`,
+    s1_p2: `Hay al menos dos interpretaciones posibles.`,
+    s1_interp1_label: `La primera interpretación es igualdad de visualización:`,
+    s1_display_ex: `Pago 1: $523.41\nPago 2: $523.41\nPago 3: $523.41\n...`,
+    s1_interp1_desc: `Desde la perspectiva del prestatario, estos pagos son iguales. El mismo importe aparece cada mes.`,
+    s1_interp2_label: `La segunda interpretación es igualdad interna:`,
+    s1_internal_ex: `Pago 1: 523.4149261837\nPago 2: 523.4149261837\nPago 3: 523.4149261837\n...`,
+    s1_interp2_desc: `Desde la perspectiva del sistema, estos pagos también son iguales, pero con mucha mayor precisión.`,
+    s1_problem: `El problema sutil es que estas dos ideas pueden divergir. Un pago mostrado como $523.41 puede estar respaldado internamente por un valor como 523.4149261837. Si el sistema usa el valor de alta precisión internamente y solo redondea para presentación, el calendario se comporta de manera diferente que si el sistema redondea primero el pago a $523.41 y luego usa ese valor redondeado en cada cálculo. Ambos enfoques pueden parecer razonables. Ambos pueden explicarse matemáticamente. Pero producen comportamientos de amortización distintos.`,
+    s1_why: `Por eso "mismo pago" no es suficientemente preciso como requisito de implementación. Un requisito mejor especificaría:`,
+    s1_list: [
+      "igual en qué nivel de precisión,",
+      "igual para quién,",
+      "igual en qué capa del sistema,",
+      "igual antes o después del redondeo,",
+      "y cuál valor se convierte en la fuente de verdad para el siguiente cálculo."
+    ],
+
+    s2_num: `§ 02`,
+    s2_title: `La variable oculta: cuándo ocurre el redondeo`,
+    s2_p1: `La pregunta más importante no es solo ¿cuál es el pago?`,
+    s2_p2: `Es: ¿cuándo se redondea el pago, y se usa ese valor redondeado en los cálculos posteriores? Considera dos modelos simplificados.`,
+    modelA_label: `Modelo A · Redondear primero`,
+    modelA_code: `Calculado:  523.4149261837\nRedondeado: 523.41\nInterno:    523.41\nMostrado:   523.41`,
+    modelB_label: `Modelo B · Preservar precisión`,
+    modelB_code: `Calculado: 523.4149261837\nInterno:   523.4149261837\nMostrado:  523.41`,
+    s2_insight: `En el Modelo A, el sistema usa $523.41 para los intereses, el capital y el saldo de cada período. Simple e intuitivo -- pero introduce una pequeña brecha permanente entre el pago ideal y el valor realmente usado. En el Modelo B, el prestatario sigue viendo $523.41, pero el calendario opera con el valor de alta precisión. La conclusión clave: $523.41 puede ser solo una representación visual, no la fuente de verdad computacional. Esa distinción lo cambia todo.`,
+
+    s3_num: `§ 03`,
+    s3_title: `Entrada redondeada vs. salida redondeada`,
+    s3_p1: `Una trampa común en el modelado de amortización es tratar el pago mostrado como el pago real.`,
+    s3_p2: `Es natural porque el dinero suele representarse en centavos. Los prestatarios pagan centavos. Los estados de cuenta muestran centavos. Los asientos contables suelen liquidarse en centavos.`,
+    s3_p3: `Pero las fórmulas no se detienen naturalmente en los centavos. Producen valores decimales con más precisión de la que cualquier campo de moneda puede mostrar -- esta es la naturaleza de la aritmética de punto flotante. Un pago calculado de 523.4149261837 no es un número redondeado esperando ser truncado; es el resultado exacto de la fórmula con toda su precisión. Por lo tanto hay una decisión de diseño:`,
+    s3_opt1_label: `Opción 1:`,
+    s3_flow1: ["Fórmula", "pago alta precisión", "redondear", "usar redondeado internamente"],
+    s3_opt2_label: `Opción 2:`,
+    s3_flow2: ["Fórmula", "pago alta precisión", "usar alta precisión internamente", "redondear para mostrar"],
+    s3_notequiv: `Esas opciones no son equivalentes.`,
+    s3_opt1_desc: `En la primera opción, el redondeo se convierte en una entrada al calendario de amortización. Cambia los saldos futuros.`,
+    s3_opt2_desc: `En la segunda opción, el redondeo se convierte en una frontera de salida. Cambia lo que la gente ve, pero no necesariamente cambia el cálculo interno en cada paso.`,
+    s3_conclusion: `Esa diferencia es la razón por la que el redondeo no puede tratarse como un detalle menor de formato. Es una decisión de dominio.`,
+
+    s4_num: `§ 04`,
+    s4_title: `Convenciones de conteo de días: 30/360 vs. Real/365`,
+    s4_p1: `Las convenciones de conteo de días añaden otra capa de complejidad.`,
+    s4_p2: `La convención 30/360 trata cada mes como si tuviera 30 días y cada año como si tuviera 360 días. Esto crea períodos uniformes para muchos cálculos de préstamos mensuales -- un préstamo regular. Real/365 usa el número real de días de cada período sobre un año de 365 días. Un período puede acumular intereses por 28 días, otro por 30, otro por 31. Este es un préstamo irregular.`,
+    s4_p3: `Esto importa porque la asignación de intereses cambia por período. Las diferentes convenciones de días reales responden esto de forma ligeramente distinta:`,
+    s4_list: [
+      "<strong>Real/365</strong>: usa el número real de días del período sobre un denominador fijo de 365 días. Simple y común.",
+      "<strong>Real/Real ISDA</strong>: usa días reales y los asigna a lo largo de la longitud real del año. Los días en un año no bisiesto se dividen entre 365; en un año bisiesto entre 366. Los períodos que cruzan el límite del año pueden dividirse."
+    ],
+    s4_formula: `Bajo una convención Real/X simple, el factor de interés depende de los días reales del período:`,
+    s4_formula_code: `factor de interés del período = tasa anual × días reales / días del año`,
+    s4_varies: `Así que aunque el pago mostrado sea el mismo cada mes, la división entre intereses y capital puede variar. Un período más largo acumula más intereses. Un período más corto acumula menos. El pago puede permanecer visualmente igual mientras que la asignación dentro de él cambia.`,
+    chart4_title: `Mismo préstamo · Mismo pago · Cómo cambia la división interés/capital según la convención`,
+    chart4_caption: `Capital $50,000 · Tasa anual 7.5% · 24 meses. La línea punteada marca el mismo pago mensual en las tres barras. Con Real/365, más días en el período = más interés acumulado = menos capital amortizado. El pago es igual; lo que cambia es la división interna.`,
+    s4_distinction: `Esto lleva a una distinción importante: la convención de conteo de días afecta la asignación de intereses. Las reglas de precisión y redondeo afectan si los pagos mostrados iguales pueden preservarse limpiamente. Es fácil confundir ambas cosas.`,
+    s4_callout: `Un calendario puede fallar en conciliarse no porque los pagos iguales sean imposibles, sino porque la implementación redondeó demasiado pronto, usó el valor incorrecto como fuente de verdad, o mezcló la precisión de visualización con la precisión de cálculo.`,
+
+    s5_num: `§ 05`,
+    s5_title: `Por qué un pago redondeado puede crear deriva`,
+    s5_p1: `Supongamos que el pago matemáticamente ideal es 523.4149261837. Si el sistema redondea esto a 523.41, la diferencia es 0.0049261837 -- menos de medio centavo.`,
+    s5_drift_code: `Ideal:      523.4149261837\nRedondeado: 523.41\nBrecha:       0.0049261837  (<½ centavo)`,
+    s5_p2: `Pero la amortización es iterativa. Cada período depende del saldo anterior. Si el pago es ligeramente menor que el valor ideal de alta precisión, la reducción del capital es ligeramente menor. Eso deja un saldo ligeramente mayor. Un saldo ligeramente mayor puede producir intereses ligeramente mayores en el siguiente período. El efecto se acumula a lo largo del calendario.`,
+    s5_p3: `Esto no necesariamente crea un error enorme, pero puede crear suficiente deriva para que el pago final difiera del pago estándar, o el saldo final necesite un ajuste explícito.`,
+    s5_p4: `Esa deriva no es aleatoria. Es la consecuencia de una decisión de modelado: el sistema eligió usar el valor redondeado como entrada computacional.`,
+
+    s6_num: `§ 06`,
+    s6_title: `Cómo los pagos internos de alta precisión preservan pagos mostrados iguales`,
+    s6_p1: `Ahora considera la alternativa. El sistema calcula el pago con alta precisión y mantiene ese valor internamente:`,
+    s6_code: `Pago interno:  523.4149261837\nPago mostrado: $523.41`,
+    s6_p2: `Cada período usa el valor interno del pago para el cálculo de amortización. El calendario mostrado sigue mostrando $523.41, pero el saldo interno evoluciona según el pago más preciso.`,
+    s6_key: `La idea clave: el pago mostrado no siempre es el pago usado internamente.`,
+    s6_callout: `Esto puede parecer contraintuitivo al principio porque el dinero se paga en centavos. Pero muchos sistemas preservan más precisión durante el cálculo y solo redondean en fronteras explícitamente definidas.`,
+    s6_boundaries_intro: `Esas fronteras importan. Por ejemplo:`,
+    s6_list: [
+      "redondear solo para visualización,",
+      "redondear al registrar una transacción contable,",
+      "redondear al generar un estado de cuenta para el prestatario,",
+      "redondear al calcular el pago final,",
+      "redondear capital e intereses por separado,",
+      "redondear solo el pago total,",
+      "preservar alta precisión hasta el paso final de conciliación."
+    ],
+    s6_conclusion: `Cada elección crea un calendario diferente. Ninguna de estas decisiones debería ser accidental.`,
+
+    ctrl_principal: `Capital ($)`,
+    ctrl_rate: `Tasa Anual (%)`,
+    ctrl_term: `Plazo (meses)`,
+    ctrl_run: `▶ Calcular`,
+    legend_a: `Modelo A (redondear primero)`,
+    legend_b: `Modelo B (alta precisión)`,
+    th_period: `#`,
+    th_a_balance: `Saldo A`,
+    th_b_balance: `Saldo B`,
+    th_delta: `Δ Deriva`,
+    th_a_interest: `Interés A`,
+    th_b_interest: `Interés B`,
+
+    s7_num: `§ 07`,
+    s7_title: `Consideraciones de implementación`,
+    s7_p1: `Desde una perspectiva de ingeniería de software, la lección central es que la amortización no es solo una fórmula. Es un conjunto de reglas de dominio. Una implementación robusta debe definir explícitamente lo siguiente.`,
+    s7_sot_title: `Fuente de verdad`,
+    s7_sot_q: `¿Qué valor es el autoritativo?`,
+    s7_sot_list: [
+      "¿el resultado de alta precisión de la fórmula,",
+      "el pago mostrado redondeado,",
+      "el importe registrado en el libro mayor,",
+      "el importe de pago contractual,",
+      "el importe del sistema de administración,",
+      "el importe conciliado final?"
+    ],
+    s7_sot_note: `Diferentes sistemas pueden necesitar respuestas diferentes. El problema no es que una respuesta sea universalmente correcta. El problema es dejar la respuesta implícita.`,
+    s7_pb_title: `Fronteras de precisión`,
+    s7_pb_intro: `¿Dónde preserva el sistema la precisión y dónde redondea? Las posibles fronteras incluyen:`,
+    s7_pb_list: [
+      "después de calcular el pago mensual,",
+      "después de calcular los intereses del período,",
+      "después de calcular el capital,",
+      "después de actualizar el saldo,",
+      "al mostrar valores,",
+      "al registrar transacciones,",
+      "al conciliar el pago final."
+    ],
+    s7_pb_note: `Cada frontera debe ser intencional.`,
+    s7_decimal_title: `Aritmética decimal`,
+    s7_decimal_p1: `Los cálculos financieros deben evitar los tipos de punto flotante binario para cálculos sensibles al dinero. Un tipo decimal, representación de punto fijo o tipo de dinero específico del dominio suele ser más seguro.`,
+    s7_decimal_p2: `El punto importante no es solo el tipo de dato, sino también el modo y la escala de redondeo. Por ejemplo:`,
+    s7_decimal_code: `monto.round(escala: 2, modo: HALF_UP)\nmonto.round(escala: 10, modo: HALF_EVEN)`,
+    s7_decimal_note: `Esas decisiones deben nombrarse y probarse.`,
+    s7_sep_title: `Separación entre dominio y presentación`,
+    s7_sep_p: `Formatear un número para visualización no es lo mismo que definir el valor usado por el modelo de dominio.`,
+    s7_sep_trap: `Esta es la trampa:`,
+    s7_sep_code: `display(pago)          -> "$523.41"   // cambia representación\npago = round(pago, 2)              // cambia el valor`,
+    s7_sep_first: `Lo primero cambia la representación.`,
+    s7_sep_second: `Lo segundo cambia el valor.`,
+    s7_sep_conclusion: `En sistemas financieros, esa distinción es fundamental.`,
+    s7_final_title: `Conciliación final`,
+    s7_final_p: `Incluso con un manejo cuidadoso de la precisión, muchos calendarios necesitan comportamiento explícito en el período final. El pago final puede necesitar cerrar el saldo restante. El sistema puede necesitar conciliar capital, intereses, comisiones y residuos de redondeo. El producto puede definir si el último pago puede diferir, si la diferencia se absorbe en otro lugar, o si el calendario se ajusta antes.`,
+    s7_final_rule: `Ese comportamiento no debe dejarse a la aritmética incidental. Debe ser una regla de negocio.`,
+
+    s8_num: `§ 08`,
+    s8_title: `Pruebas que vale la pena escribir`,
+    s8_p1: `Las pruebas de un sistema de amortización deben hacer más que verificar que la fórmula devuelve un pago plausible. Deben probar las invariantes que el negocio realmente le importan.`,
+    s8_display_title: `Igualdad de visualización`,
+    s8_display_p: `Si el producto promete pagos mostrados iguales, prueba que los pagos del prestatario sean iguales en la precisión de visualización.`,
+    s8_display_code: `pagoMostrado(período_1) == pagoMostrado(período_2)`,
+    s8_display_note: `Pero sé explícito: esto es igualdad de visualización, no necesariamente igualdad interna.`,
+    s8_balance_title: `Consistencia del saldo interno`,
+    s8_balance_p: `Prueba que el saldo interno evolucione como se espera bajo el modelo de precisión elegido.`,
+    s8_balance_code: `saldo_inicial\n- componente_capital\n= saldo_final`,
+    s8_recon_title: `Conciliación total de capital e intereses`,
+    s8_recon_p: `A lo largo de todo el calendario:`,
+    s8_recon_code: `suma(capital)   ≈ capital_original\nsuma(intereses) ≈ total_intereses_esperado`,
+    s8_final_title: `Saldo final`,
+    s8_final_p: `El calendario debe terminar correctamente.`,
+    s8_final_code: `saldo_final == 0\n// o, si se preserva alta precisión:\nsaldo_final dentro de tolerancia aceptada antes del ajuste final`,
+    s8_edge_title: `Casos extremos de conteo de días`,
+    s8_edge_p: `Prueba duraciones de período que comúnmente exponen supuestos:`,
+    s8_edge_list: [
+      "febrero,",
+      "meses de 31 días,",
+      "períodos de primer pago irregulares,",
+      "años bisiestos si aplica,",
+      "períodos finales cortos,",
+      "plazos largos,",
+      "tasas de interés altas,",
+      "montos de capital muy pequeños,",
+      "pagos anticipados."
+    ],
+    s8_strat_title: `Comparación de estrategias de redondeo`,
+    s8_strat_p: `Para fines educativos y de depuración, compara múltiples estrategias en paralelo:`,
+    s8_strat_list: [
+      "redondear el pago primero,",
+      "preservar precisión interna,",
+      "redondear intereses en cada período,",
+      "redondear capital en cada período,",
+      "ajustar solo el pago final."
+    ],
+
+    s9_num: `§ 09`,
+    s9_title: `La lección más profunda`,
+    s9_p1: `La parte más difícil de implementar la amortización no siempre es la fórmula.`,
+    s9_p2: `A menudo, es decidir cuál número es real. ¿Es el pago real el resultado de alta precisión de la fórmula? ¿El importe de dos decimales mostrado? ¿El importe usado para calcular el siguiente saldo? ¿El importe registrado en el libro mayor? ¿El importe esperado por un sistema externo?`,
+    s9_p3: `Hasta que esas fronteras sean explícitas, dos implementaciones pueden parecer matemáticamente razonables y aún así producir calendarios diferentes.`,
+    s9_callout: `Por eso el redondeo pertenece al modelo de dominio. Debe ser nombrado, probado, documentado y tratado como una regla de negocio -- no dejado como un detalle incidental de formato.`,
+    s9_p4: `Los pagos iguales no son solo una propiedad matemática. Son una promesa del producto implementada a través de reglas de precisión, fronteras de redondeo y decisiones de fuente de verdad.`,
+    s9_p5: `La fórmula importa. Pero el modelo alrededor de la fórmula importa igual.`,
+
+    closing_title: `Reflexión final`,
+    closing_p1: `Esta exploración cambió cómo pienso sobre el software financiero.`,
+    closing_p2: `Al principio, era fácil enfocarse en el comportamiento visible: si los pagos parecían iguales, si el pago final derivaba, si 30/360 se comportaba diferente de Real/365.`,
+    closing_p3: `Pero la lección más importante estaba debajo de los números. Un cálculo financiero no es solo un cálculo. Es una cadena de decisiones sobre representación, precisión, tiempo y verdad. Y una vez que el dinero entra al sistema, esas decisiones ya no son detalles de implementación. Son el producto.`,
+
+    footer_art1: `Parte I: Préstamos y sus Partes`,
+    footer_art2: "Parte II: Calculadora de Amortización"
+  }
+};
+
+// ------------------------------------------------------------
+// RENDER ENGINE
+// ------------------------------------------------------------
+let lang = 'en';
+
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.textContent === l.toUpperCase()));
+  render();
+}
+
+function render() {
+  const t = T[lang];
+  // data-i18n text nodes
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (t[key] !== undefined) el.innerHTML = t[key];
+  });
+  // pre blocks
+  const preMap = {
+    s1_display_ex: t.s1_display_ex, s1_internal_ex: t.s1_internal_ex,
+    modelA_code: t.modelA_code, modelB_code: t.modelB_code,
+    s4_formula_code: t.s4_formula_code, s5_drift_code: t.s5_drift_code,
+    s6_code: t.s6_code, s7_decimal_code: t.s7_decimal_code,
+    s7_sep_code: t.s7_sep_code, s8_display_code: t.s8_display_code,
+    s8_balance_code: t.s8_balance_code, s8_recon_code: t.s8_recon_code,
+    s8_final_code: t.s8_final_code
+  };
+  Object.entries(preMap).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  });
+  // lists
+  const listMap = {
+    'intro-list': t.intro_list,
+    's1-list': t.s1_list,
+    's4-list': t.s4_list,
+    's6-list': t.s6_list,
+    's7-sot-list': t.s7_sot_list,
+    's7-pb-list': t.s7_pb_list,
+    's8-edge-list': t.s8_edge_list,
+    's8-strat-list': t.s8_strat_list
+  };
+  Object.entries(listMap).forEach(([id, items]) => {
+    const el = document.getElementById(id);
+    if (el && items) el.innerHTML = items.map(i => `<li>${i}</li>`).join('');
+  });
+  // flows
+  renderFlow('flow1', t.s3_flow1);
+  renderFlow('flow2', t.s3_flow2);
+  // chart
+  renderChart4();
+  // table header
+  const hdr = document.getElementById('table-header');
+  if (hdr) hdr.innerHTML = `
+    <th>${t.th_period}</th>
+    <th class="model-a-col">${t.th_a_interest}</th>
+    <th class="model-a-col">${t.th_a_balance}</th>
+    <th class="model-b-col">${t.th_b_interest}</th>
+    <th class="model-b-col">${t.th_b_balance}</th>
+    <th class="delta-col">${t.th_delta}</th>
+  `;
+  buildTable();
+}
+
+function renderFlow(id, steps) {
+  const el = document.getElementById(id);
+  if (!el || !steps) return;
+  el.innerHTML = steps.map((s, i) => {
+    const isLast = i === steps.length - 1;
+    const hl = (i === 2) ? ' highlight' : '';
+    return `<span class="flow-step${hl}">${s}</span>${isLast ? '' : '<span class="flow-arrow">-></span>'}`;
+  }).join('');
+}
+
+// ------------------------------------------------------------
+// §4 CHART -- stacked bar: 30-day vs 31-day first period
+// ------------------------------------------------------------
+function renderChart4() {
+  const svg = document.getElementById('chart4');
+  if (!svg) return;
+
+  const principal = 50000, annualRate = 0.075, n = 24;
+  const r_30360 = annualRate / 12;
+  const payment_30360 = principal * r_30360 / (1 - Math.pow(1 + r_30360, -n));
+  const int_30360   = principal * r_30360;
+  const prin_30360  = payment_30360 - int_30360;
+
+  const payment_ref = payment_30360;
+  const int_act28   = principal * annualRate * 28 / 365;
+  const prin_act28  = payment_ref - int_act28;
+  const int_act31   = principal * annualRate * 31 / 365;
+  const prin_act31  = payment_ref - int_act31;
+
+  const isEs = lang === 'es';
+
+  const bars = [
+    {
+      lines: ['30/360'],
+      int: int_30360, prin: prin_30360,
+      colorInt: '#c0392b', colorPrin: '#e8c4c1',
+      note: isEs ? 'tasa fija /12' : 'fixed rate /12'
+    },
+    {
+      lines: isEs ? ['Real/365', '28 días reales', '(ene → feb)'] : ['Actual/365', '28 actual days', '(Jan → Feb)'],
+      int: int_act28, prin: prin_act28,
+      colorInt: '#1a5276', colorPrin: '#aed6f1',
+      note: isEs ? 'tasa diaria × 28' : 'daily rate × 28'
+    },
+    {
+      lines: isEs ? ['Real/365', '31 días reales', '(mar → abr)'] : ['Actual/365', '31 actual days', '(Mar → Apr)'],
+      int: int_act31, prin: prin_act31,
+      colorInt: '#117a65', colorPrin: '#a2d9ce',
+      note: isEs ? 'tasa diaria × 31' : 'daily rate × 31'
+    }
+  ];
+
+  const W = 620, H = 310;
+  const padL = 72, padR = 20, padT = 50, padB = 70;
+  const chartH = H - padT - padB;
+  const chartW = W - padL - padR;
+  const maxVal = payment_ref * 1.12;
+  const barW = 82, gap = (chartW - bars.length * barW) / (bars.length + 1);
+  const yScale = v => padT + chartH - (v / maxVal) * chartH;
+  const fmt = v => '$' + v.toFixed(2);
+
+  let html = '';
+
+  const paymentY = yScale(payment_ref);
+  html += `<line x1="${padL + gap - 6}" y1="${paymentY}" x2="${W - padR - gap + 6}" y2="${paymentY}" stroke="#c0392b" stroke-width="1" stroke-dasharray="4,3"/>`;
+  const payLabel = isEs ? `Mismo pago: ${fmt(payment_ref)}` : `Same payment: ${fmt(payment_ref)}`;
+  html += `<text x="${W - padR - gap + 4}" y="${paymentY - 4}" text-anchor="end" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#c0392b" font-weight="500">${payLabel}</text>`;
+
+  [0, 0.25, 0.5, 0.75, 1].forEach(frac => {
+    const yv = maxVal * frac;
+    const y = yScale(yv);
+    html += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#d8d4cb" stroke-width="0.5"/>`;
+    html += `<text x="${padL - 6}" y="${y + 4}" text-anchor="end" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#9e9a90">$${Math.round(yv)}</text>`;
+  });
+
+  html += `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT + chartH}" stroke="#d8d4cb" stroke-width="1"/>`;
+  html += `<line x1="${padL}" y1="${padT + chartH}" x2="${W - padR}" y2="${padT + chartH}" stroke="#d8d4cb" stroke-width="1"/>`;
+
+  bars.forEach((bar, i) => {
+    const x = padL + gap + i * (barW + gap);
+    const base = padT + chartH;
+    const intH   = (bar.int  / maxVal) * chartH;
+    const prinH  = (bar.prin / maxVal) * chartH;
+
+    html += `<rect x="${x}" y="${base - prinH}" width="${barW}" height="${prinH}" fill="${bar.colorPrin}" rx="2"/>`;
+    html += `<rect x="${x}" y="${base - prinH - intH}" width="${barW}" height="${intH}" fill="${bar.colorInt}" rx="2"/>`;
+
+    const intMidY = base - prinH - intH / 2 + 4;
+    html += `<text x="${x + barW / 2}" y="${intMidY}" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="white" font-weight="500">${fmt(bar.int)}</text>`;
+
+    const prinMidY = base - prinH / 2 + 4;
+    html += `<text x="${x + barW / 2}" y="${prinMidY}" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="${bar.colorInt}">${fmt(bar.prin)}</text>`;
+
+    bar.lines.forEach((ln, li) => {
+      const fw = li === 0 ? '500' : '400';
+      const fc = li === 0 ? '#2c2a25' : '#9e9a90';
+      html += `<text x="${x + barW / 2}" y="${base + 14 + li * 13}" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="${fc}" font-weight="${fw}">${ln}</text>`;
+    });
+  });
+
+  const legendItems = isEs
+    ? [{ color: '#c0392b', label: 'Interés (varía)' }, { color: '#d8d4cb', label: 'Capital (varía)' }]
+    : [{ color: '#c0392b', label: 'Interest (varies)' }, { color: '#d8d4cb', label: 'Principal (varies)' }];
+  legendItems.forEach((item, i) => {
+    const lx = padL + i * 120;
+    html += `<rect x="${lx}" y="10" width="10" height="10" fill="${item.color}" rx="2"/>`;
+    html += `<text x="${lx + 14}" y="19" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#9e9a90">${item.label}</text>`;
+  });
+
+  const bar2x = padL + gap + 1 * (barW + gap) + barW / 2;
+  const bar3x = padL + gap + 2 * (barW + gap) + barW / 2;
+  const annY = yScale(payment_ref * 0.55);
+  html += `<line x1="${bar2x + barW/2 + 4}" y1="${annY}" x2="${bar3x - barW/2 - 4}" y2="${annY}" stroke="#d8d4cb" stroke-width="0.8"/>`;
+
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = html;
+}
+
+// ------------------------------------------------------------
+// MODEL A vs B TABLE
+// ------------------------------------------------------------
+function buildTable() {
+  const principal = parseFloat(document.getElementById('inp_principal').value) || 50000;
+  const annualRate = parseFloat(document.getElementById('inp_rate').value) / 100 || 0.075;
+  const n = parseInt(document.getElementById('inp_term').value) || 24;
+  const r = annualRate / 12;
+  const paymentHigh = principal * r / (1 - Math.pow(1 + r, -n));
+  const paymentRounded = Math.round(paymentHigh * 100) / 100;
+
+  let balA = principal, balB = principal;
+  const rows = [];
+
+  for (let i = 1; i <= n; i++) {
+    const intA = balA * r;
+    const prinA = paymentRounded - intA;
+    balA = Math.max(0, balA - prinA);
+
+    const intB = balB * r;
+    const prinB = paymentHigh - intB;
+    balB = Math.max(0, balB - prinB);
+
+    const delta = Math.abs(balA - balB);
+    rows.push({ period: i, intA, balA, intB, balB, delta });
+  }
+
+  const fmt = v => v < 0 ? '$0.00' : '$' + Math.abs(v).toFixed(2);
+  const fmtD = v => v < 0.000001 ? '--' : '$' + v.toFixed(6);
+
+  const showRows = n <= 8
+    ? rows
+    : [...rows.slice(0, 3), null, ...rows.slice(-3)];
+
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = showRows.map((row) => {
+    if (!row) return `<tr><td colspan="6" style="text-align:center;color:var(--text3);font-size:0.7rem;padding:0.3rem">· · ·</td></tr>`;
+    const isFinal = row.period === n;
+    const deltaClass = row.delta < 0.000001 ? 'delta-zero' : 'delta-positive';
+    return `<tr class="${isFinal ? 'final-row' : ''}">
+      <td>${row.period}</td>
+      <td>$${row.intA.toFixed(4)}</td>
+      <td>${fmt(row.balA)}</td>
+      <td>$${row.intB.toFixed(4)}</td>
+      <td>${fmt(row.balB)}</td>
+      <td class="${deltaClass}">${fmtD(row.delta)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ------------------------------------------------------------
+// INIT
+// ------------------------------------------------------------
+render();
+</script>
+</body>
+</html>

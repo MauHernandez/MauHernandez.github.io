@@ -1,0 +1,92 @@
+/* ─────────────────────────────────────────────────
+   posts.css — shared base for all post pages
+   Fonts, design tokens, reset, body, container,
+   and lang-picker are defined here once.
+   Page-specific styles live in each page's <style>.
+───────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap');
+
+/* ── Design tokens ── */
+:root {
+  --bg:         #f5f3ee;
+  --bg2:        #eae7df;
+  --bg3:        #ddd9cf;
+  --card:       #ffffff;
+  --text:       #2c2a25;
+  --text2:      #6b6860;
+  --text3:      #9e9a90;
+  --accent:     #b45309;
+  --accent2:    #d97706;
+  --accent-bg:  #fef3c7;
+  --blue:       #1e6faf;
+  --blue-bg:    #e8f1f8;
+  --border:     #d8d4cb;
+  --mono:       'JetBrains Mono', monospace;
+  --sans:       'DM Sans', system-ui, sans-serif;
+  --display:    'Fraunces', Georgia, serif;
+  --radius:     10px;
+  --shadow:     0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+}
+
+/* ── Reset ── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ── Base ── */
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Padding is set per-page since articles and tools differ */
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+/* ── Language picker ── */
+.lang-picker {
+  display: inline-flex;
+  background: var(--bg2);
+  border-radius: 8px;
+  padding: 3px;
+  box-shadow: var(--shadow);
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.lang-btn {
+  border: none;
+  background: none;
+  padding: 5px 12px;
+  cursor: pointer;
+  color: var(--text2);
+  transition: all 0.2s;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.lang-btn:hover {
+  background: var(--card);
+  color: var(--text);
+}
+
+.lang-btn.active {
+  background: var(--card);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+
+.lang-btn .flag {
+  font-size: 1.1rem;
+  line-height: 1;
+}

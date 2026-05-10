@@ -1,190 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    
-      <title>Posts :: Mau Hernandez — Personal Site</title>
-    
-    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content=""/>
-<meta name="keywords" content="MauHernandez, Maureen, Hernandez, spectrum, researcher, pm, delivery, operations, ULA, manager, venezuela "/>
-<meta name="robots" content="noodp"/>
-<link rel="canonical" href="/posts/" />
+<title>Writing — Mau Hernandez</title>
+<link rel="stylesheet" href="/assets/posts.css">
+<style>
+nav {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 2rem;
+}
+.nav-home {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--text3);
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  transition: color 0.2s;
+}
+.nav-home::before { content: '← '; }
+.nav-home:hover { color: var(--accent); }
 
+.container { padding: 4rem 2rem 6rem; }
 
+.page-title {
+  font-family: var(--display);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.4rem;
+}
 
+.page-count {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--text3);
+  letter-spacing: 0.05em;
+  margin-bottom: 3rem;
+}
 
+.article-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
 
-<link rel="stylesheet" href="/assets/style.css">
+.article-card {
+  display: block;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem 2rem;
+  text-decoration: none;
+  box-shadow: var(--shadow);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.article-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
 
+.article-series {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.4rem;
+}
 
-<link rel="stylesheet" href="/style.css">
+.article-title {
+  font-family: var(--display);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.35rem;
+}
 
-
-<link rel="apple-touch-icon-precomposed" sizes="144x144" href="/img/apple-touch-icon-144-precomposed.png">
-<link rel="shortcut icon" href="/img/favicon.png">
-
-
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Posts"/>
-<meta name="twitter:description" content=""/>
-
-
-
-<meta property="og:title" content="Posts" />
-<meta property="og:description" content="" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="/posts/" />
-<meta property="og:updated_time" content="2020-08-08T00:00:00+00:00" /><meta property="og:site_name" content="Mau Hernandez" />
-
-
-
-<link rel="alternate" type="application/rss+xml" href="/posts/index.xml" title="Mau Hernandez" />
-
-
-
-  </head>
-  <body class="dark-theme">
-    <div class="container">
-      <header class="header">
-  <span class="header__inner">
-    <a href="/" class="logo" style="text-decoration: none;">
-  
-    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
-  <path fill="none" d="M15 8l14.729 14.382L15 35.367"/>
-</svg>
-</span>
-    <span class="logo__text">MauHernandez</span>
-    <span class="logo__cursor"></span>
-  
-</a>
-
-    <span class="header__right">
-      
-        <nav class="menu">
-  <ul class="menu__inner menu__inner--desktop">
-    
-      
-        
-          <li><a href="/about">About</a></li>
-        
-      
-      
-    
-  </ul>
-
-  <ul class="menu__inner menu__inner--mobile">
-    
-      
-        <li><a href="/about">About</a></li>
-      
-    
-  </ul>
+.article-desc {
+  font-size: 0.88rem;
+  color: var(--text2);
+  line-height: 1.55;
+}
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-home" href="/">MauHernandez</a>
 </nav>
+<div class="container">
+  <h1 class="page-title">Writing</h1>
+  <p class="page-count">3 articles</p>
 
-        <span class="menu-trigger">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-            <path d="M0 0h24v24H0z" fill="none"/>
-            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-          </svg>
-        </span>
-      
-      <span class="theme-toggle">
-        <svg class="theme-toggler" width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M22 41C32.4934 41 41 32.4934 41 22C41 11.5066 32.4934 3 22
-  3C11.5066 3 3 11.5066 3 22C3 32.4934 11.5066 41 22 41ZM7 22C7
-  13.7157 13.7157 7 22 7V37C13.7157 37 7 30.2843 7 22Z"/>
-</svg>
+  <div class="article-list">
 
-      </span>
-    </span>
-  </span>
-</header>
+    <a class="article-card" href="/posts/amortization/">
+      <div class="article-series">Loan Amortization · 1</div>
+      <div class="article-title">Loans and Their Components</div>
+      <div class="article-desc">A progressive guide for the non-accountant — from basic concepts to the mathematical principles behind monthly payments.</div>
+    </a>
 
+    <a class="article-card" href="/posts/amortization-calculator/">
+      <div class="article-series">Loan Amortization · 2</div>
+      <div class="article-title">Loan Amortization Calculator</div>
+      <div class="article-desc">Understanding Newton-Raphson, day count conventions, and why real payments differ from textbook formulas.</div>
+    </a>
 
-      <div class="content">
-        
-  <div class="posts">
-    
-    <div class="post on-list">
-      <h1 class="post-title"><a href="/posts/hello/">This side UP!</a></h1>
-      <div class="post-meta">
-        
-          <span class="post-date">
-            2020-08-08
-          </span>
+    <a class="article-card" href="/posts/rounding-is-domain-logic/">
+      <div class="article-series">Loan Amortization · 3</div>
+      <div class="article-title">Rounding Is Domain Logic</div>
+      <div class="article-desc">A software engineering perspective on precision boundaries, source of truth, and why rounding is a domain decision — not a formatting detail.</div>
+    </a>
 
-          
-        
-        <span class="post-author">— Written by Mau</span>
-        
-          <span class="post-read-time">— 3 min read</span>
-        
-      </div>
-
-      
-
-      
-        <figure class="post-cover">
-          
-            <img src="/img/mau.jpg" />
-          
-
-          
-        </figure>
-      
-
-      <div class="post-content">
-        
-          Now that you are here, come in! My name is Maureen but my friends call me Mau. I&rsquo;m a system engineer working as a manager and sometimes I act as a researcher for electromagnetic spectrum research and Internet Governance.
-        
-      </div>
-      
-        <div><a class="read-more button" href="/posts/hello/">Read more →</a></div>
-      
-    </div>
-    
-    <div class="pagination">
-  <div class="pagination__buttons">
-    
-    
   </div>
 </div>
-
-  </div>
-
-      </div>
-
-      
-        <footer class="footer">
-  <div class="footer__inner">
-    
-      <a href="/" class="logo" style="text-decoration: none;">
-  
-    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
-  <path fill="none" d="M15 8l14.729 14.382L15 35.367"/>
-</svg>
-</span>
-    <span class="logo__text">MauHernandez</span>
-    <span class="logo__cursor"></span>
-  
-</a>
-
-      <div class="copyright">
-        <span>© 2020 Powered by <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a></span>
-        <span>Theme created by <a href="https://twitter.com/panr" target="_blank" rel="noopener">panr</a></span>
-      </div>
-    
-  </div>
-</footer>
-
-<script src="/assets/main.js"></script>
-<script src="/assets/prism.js"></script>
-
-
-      
-    </div>
-
-    
-  </body>
+</body>
 </html>
